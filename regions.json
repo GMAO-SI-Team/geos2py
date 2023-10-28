@@ -1,0 +1,297 @@
+{
+    "-1": [
+        50,
+        89,
+        53,
+        51,
+        49,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        73,
+        74,
+        75
+    ],
+    "0": [
+        34,
+        35,
+        42,
+        43,
+        44,
+        46,
+        47,
+        71,
+        72
+    ],
+    "34": {
+        "file_tag": "northamerica_proj",
+        "center": [
+            -75,
+            20.0
+        ],
+        "proj": "nsper"
+    },
+    "35": {
+        "file_tag": "westpacific_proj",
+        "center": [
+            140,
+            17.5
+        ],
+        "proj": "nsper"
+    },
+    "42": {
+        "file_tag": "goeseast_proj",
+        "center": [
+            -75,
+            0.0
+        ],
+        "proj": "geos"
+    },
+    "43": {
+        "file_tag": "goeswest_proj",
+        "center": [
+            -135,
+            0.0
+        ],
+        "proj": "geos"
+    },
+    "44": {
+        "file_tag": "meteosat8_proj",
+        "center": [
+            41.5,
+            0.0
+        ],
+        "proj": "geos"
+    },
+    "46": {
+        "file_tag": "meteosat10_proj",
+        "center": [
+            0.0,
+            0.0
+        ],
+        "proj": "geos"
+    },
+    "47": {
+        "file_tag": "himawari_proj",
+        "center": [
+            140.7,
+            0.0
+        ],
+        "proj": "geos"
+    },
+    "71": {
+        "file_tag": "nh_proj",
+        "center": [
+            -90,
+            80.0
+        ],
+        "proj": "nsper"
+    },
+    "72": {
+        "file_tag": "sh_proj",
+        "center": [
+            -90,
+            -80.0
+        ],
+        "proj": "nsper"
+    },
+    "50": {
+        "file_tag": "usa_mapset",
+        "extent": [
+            -128.0,
+            -64.0,
+            23.5,
+            49.0
+        ],
+        "center": [
+            -99.0,
+            30.0
+        ],
+        "proj": "ortho"
+    },
+    "89": {
+        "file_tag": "centralusa_mapset",
+        "extent": [
+            -110.25,
+            -69.75,
+            30.0,
+            45.0
+        ],
+        "center": [
+            -90.0,
+            37.5
+        ],
+        "proj": "ortho"
+    },
+    "53": {
+        "file_tag": "midatlantic_mapset",
+        "extent": [
+            -88.25,
+            -69.75,
+            34.5,
+            41.5
+        ],
+        "center": [
+            -79.0,
+            32.5
+        ],
+        "proj": "laea"
+    },
+    "51": {
+        "file_tag": "maryland_mapset",
+        "extent": [
+            -80.5,
+            -74.5,
+            37.5,
+            39.75
+        ],
+        "center": [
+            -77.5,
+            38.625
+        ],
+        "proj": "laea"
+    },
+    "49": {
+        "file_tag": "northatlantic_mapset",
+        "extent": [
+            -100.0,
+            0.0,
+            5.25,
+            47.75
+        ],
+        "center": [
+            -50.0,
+            20.0
+        ],
+        "proj": "laea"
+    },
+    "65": {
+        "file_tag": "europe_mapset",
+        "extent": [
+            -40.0,
+            80.0,
+            20.0,
+            65.0
+        ],
+        "center": [
+            20.0,
+            30.0
+        ],
+        "proj": "laea"
+    },
+    "66": {
+        "file_tag": "asia_mapset",
+        "extent": [
+            60.0,
+            180.0,
+            0.0,
+            52.5
+        ],
+        "center": [
+            120.0,
+            10.0
+        ],
+        "proj": "laea"
+    },
+    "67": {
+        "file_tag": "australia_mapset",
+        "extent": [
+            60.0,
+            180.0,
+            -45.0,
+            10.0
+        ],
+        "center": [
+            120.0,
+            -10.0
+        ],
+        "proj": "laea"
+    },
+    "68": {
+        "file_tag": "africa_mapset",
+        "extent": [
+            -50.0,
+            80.0,
+            -30.0,
+            35.0
+        ],
+        "center": [
+            0.0,
+            0.0
+        ],
+        "proj": "laea"
+    },
+    "69": {
+        "file_tag": "southamerica_mapset",
+        "extent": [
+            -135.0,
+            -5.0,
+            -45.0,
+            15.0
+        ],
+        "center": [
+            -70.0,
+            -10.0
+        ],
+        "proj": "laea"
+    },
+    "70": {
+        "file_tag": "northamerica_mapset",
+        "extent": [
+            -150.0,
+            -30.0,
+            17.5,
+            65.0
+        ],
+        "center": [
+            -90.0,
+            20.0
+        ],
+        "proj": "laea"
+    },
+    "73": {
+        "file_tag": "epacific_mapset",
+        "extent": [
+            -180.0,
+            -15.0,
+            -6.5,
+            65.0
+        ],
+        "center": [
+            -90.0,
+            20.0
+        ],
+        "proj": "laea"
+    },
+    "74": {
+        "file_tag": "indianocean_mapset",
+        "extent": [
+            28.0,
+            132.0,
+            -25.0,
+            25.0
+        ],
+        "center": [
+            80.0,
+            0.0
+        ],
+        "proj": "laea"
+    },
+    "75": {
+        "file_tag": "westatlantic_mapset",
+        "extent": [
+            -105.0,
+            -35.0,
+            8.5,
+            39.75
+        ],
+        "center": [
+            -72.5,
+            10.0
+        ],
+        "proj": "laea"
+    }
+}
