@@ -25,39 +25,39 @@ If you are working locally, the dependencies are:
 ## Performance
 
 #### plotall_ir8
-average time 'sub': 0.0 hours 0.0 minutes 10.232033967971802 seconds
-average time 'ortho': 0.0 hours 0.0 minutes 11.514650583267212 seconds
-average time 'laea': 0.0 hours 0.0 minutes 13.195988631248474 seconds
-average time 'geos': 0.0 hours 0.0 minutes 14.224856567382812 seconds
-average time 'nsper': 0.0 hours 0.0 minutes 13.688894152641296 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 10.232033967971802 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 11.514650583267212 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 13.195988631248474 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 14.224856567382812 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 13.688894152641296 seconds
 
 #### plotall_wxtype
-average time 'sub': 0.0 hours 0.0 minutes 39.75187683105469 seconds
-average time 'ortho': 0.0 hours 1.0 minutes 47.156792879104614 seconds
-average time 'laea': 0.0 hours 0.0 minutes 48.601584911346436 seconds
-average time 'geos': 0.0 hours 1.0 minutes 46.67049479484558 seconds
-average time 'nsper': 0.0 hours 1.0 minutes 50.50699996948242 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 39.75187683105469 seconds
+- average time 'ortho': 0.0 hours 1.0 minutes 47.156792879104614 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 48.601584911346436 seconds
+- average time 'geos': 0.0 hours 1.0 minutes 46.67049479484558 seconds
+- average time 'nsper': 0.0 hours 1.0 minutes 50.50699996948242 seconds
 
 #### plotall_radar
-average time 'sub': 0.0 hours 0.0 minutes 14.13889753818512 seconds
-average time 'ortho': 0.0 hours 0.0 minutes 15.65565550327301 seconds
-average time 'laea': 0.0 hours 0.0 minutes 16.701356053352356 seconds
-average time 'geos': 0.0 hours 0.0 minutes 16.995589017868042 seconds
-average time 'nsper': 0.0 hours 0.0 minutes 17.368183076381683 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 14.13889753818512 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 15.65565550327301 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 16.701356053352356 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 16.995589017868042 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 17.368183076381683 seconds
 
 #### plotall_precrain
-average time 'sub': 0.0 hours 0.0 minutes 8.57942807674408 seconds
-average time 'ortho': 0.0 hours 0.0 minutes 11.32456088066101 seconds
-average time 'laea': 0.0 hours 0.0 minutes 13.072884774208068 seconds
-average time 'geos': 0.0 hours 0.0 minutes 12.116543436050415 seconds
-average time 'nsper': 0.0 hours 0.0 minutes 12.069870054721832 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 8.57942807674408 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 11.32456088066101 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 13.072884774208068 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 12.116543436050415 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 12.069870054721832 seconds
 
 #### plotall_precsnow
-average time 'sub': 0.0 hours 0.0 minutes 9.807256579399109 seconds
-average time 'ortho': 0.0 hours 0.0 minutes 10.264758110046387 seconds
-average time 'laea': 0.0 hours 0.0 minutes 11.609730076789855 seconds
-average time 'geos': 0.0 hours 0.0 minutes 11.448821258544921 seconds
-average time 'nsper': 0.0 hours 0.0 minutes 10.888549625873566 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 9.807256579399109 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 10.264758110046387 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 11.609730076789855 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 11.448821258544921 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 10.888549625873566 seconds
 
 #### plotall_aerosols
 **pending**
@@ -66,39 +66,39 @@ average time 'nsper': 0.0 hours 0.0 minutes 10.888549625873566 seconds
 **pending**
 
 #### plotall_t2m
-average time 'sub': 0.0 hours 0.0 minutes 9.49286139011383 seconds
-average time 'ortho': 0.0 hours 0.0 minutes 12.913065075874329 seconds
-average time 'laea': 0.0 hours 0.0 minutes 13.569564175605773 seconds
-average time 'geos': 0.0 hours 0.0 minutes 13.966146612167359 seconds
-average time 'nsper': 0.0 hours 0.0 minutes 14.035657703876495 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 9.49286139011383 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 12.913065075874329 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 13.569564175605773 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 13.966146612167359 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 14.035657703876495 seconds
 
 #### plotall_tpw
-average time 'sub': 0.0 hours 0.0 minutes 11.00346064567566 seconds
-average time 'ortho': 0.0 hours 0.0 minutes 12.062952399253845 seconds
-average time 'laea': 0.0 hours 0.0 minutes 14.307450294494629 seconds
-average time 'geos': 0.0 hours 0.0 minutes 13.70802993774414 seconds
-average time 'nsper': 0.0 hours 0.0 minutes 13.780909240245819 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 11.00346064567566 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 12.062952399253845 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 14.307450294494629 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 13.70802993774414 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 13.780909240245819 seconds
 
 #### plotall_cape
-average time 'sub': 0.0 hours 0.0 minutes 10.370289087295532 seconds
-average time 'ortho': 0.0 hours 0.0 minutes 12.009145975112915 seconds
-average time 'laea': 0.0 hours 0.0 minutes 13.465498185157776 seconds
-average time 'geos': 0.0 hours 0.0 minutes 13.688392782211304 seconds
-average time 'nsper': 0.0 hours 0.0 minutes 12.895038187503815 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 10.370289087295532 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 12.009145975112915 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 13.465498185157776 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 13.688392782211304 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 12.895038187503815 seconds
 
 #### plotall_vort500mb
-average time 'sub': 0.0 hours 0.0 minutes 24.911166191101074 seconds
-average time 'ortho': 0.0 hours 0.0 minutes 42.29221761226654 seconds
-average time 'laea': 0.0 hours 0.0 minutes 50.836144137382504 seconds
-average time 'geos': 0.0 hours 0.0 minutes 43.15956325531006 seconds
-average time 'nsper': 0.0 hours 0.0 minutes 43.311415791511536 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 24.911166191101074 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 42.29221761226654 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 50.836144137382504 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 43.15956325531006 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 43.311415791511536 seconds
 
 #### plotall_winds10m
-average time 'sub': 0.0 hours 0.0 minutes 10.466203808784485 seconds
-average time 'ortho': 0.0 hours 0.0 minutes 12.390382051467896 seconds
-average time 'laea': 0.0 hours 0.0 minutes 14.286669969558716 seconds
-average time 'geos': 0.0 hours 0.0 minutes 15.273489904403686 seconds
-average time 'nsper': 0.0 hours 0.0 minutes 14.948720812797546 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 10.466203808784485 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 12.390382051467896 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 14.286669969558716 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 15.273489904403686 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 14.948720812797546 seconds
 
 ## TODO
 - Fix storm location bug in plotall_slp
