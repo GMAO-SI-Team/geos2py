@@ -145,6 +145,20 @@ def load_cube(infile: str, search_variable: str, undef, **kwargs):
     is1d, is2d, is3d = [len(data.shape) == dim for dim in range(1, 4)]
     return Cube(data, is1d, is2d, is3d, settings)
 
+def load_lcc(infile, search_variable):
+    dataset = Dataset(infile)
+    dims = dataset.dimensions
+    nx, ny, nf, nt, nz = [0] * 5
+    nx, ny, nf, nt = get_xy_dimension_sizes(dims, nx, ny, nf, nt)
+    data = get_nc_variable_data(dataset, search_variable)
+    if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
+        grid = Dataset('/discover/nobackup/projects/gmao/osse2//stage/BCS_FILES/lambert_grid.nc4')
+    else:
+        grid = Dataset('data/lambert_grid.nc4')
+    lons = get_nc_variable_data(grid, 'lons')
+    lats = get_nc_variable_data(grid, 'lats')
+    return data, lons, lats
+
 def extract_load_settings(params: dict, param_type='cube') -> dict:
     """
     Extracts defined optional parameters and defines default values for undefined optional parameters.
@@ -206,11 +220,14 @@ def clean_data(data: np.ndarray, undef=None, fill='nan', data_type='cube'):
     if undef:
         fill = {'nan': np.nan, 'zero': 0.0}[fill]
         is_undef = np.where(data == undef) if data_type == 'cube' else np.where(data >= undef)
-        if len(is_undef) == len(data): 
+        if len(is_undef) == len(data):
             sys.exit()
         if len(is_undef[0]) == 0:                 
             data[is_undef] = fill
             return data
+        else:
+            mask = data == undef
+            return np.ma.masked_where(mask, data)
         
 def curate_levels(nc_variables, search_variable, levels, level, nx, ny, time=None):
     if level:
