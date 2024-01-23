@@ -60,10 +60,10 @@ If you are working locally, the dependencies are:
 - average time 'nsper': 0.0 hours 0.0 minutes 10.888549625873566 seconds
 
 #### plotall_aerosols
-**pending**
+- pending
 
 #### plotall_slp
-**pending**
+- pending
 
 #### plotall_t2m
 - average time 'sub': 0.0 hours 0.0 minutes 9.49286139011383 seconds
@@ -114,7 +114,7 @@ If you are working locally, the dependencies are:
 - Continue to add more documentation
 - Refactor for better cohesion where worth it
 
-### Caching
+## Caching
 A lot of performance improvements are resultant from pre-emptive caching. Chief cached elements include coastlines, borders, natural earth base images, and so on. These assets are pretransformed to suit the corresponding plot and region and are named accordingly. It is strongly encouraged that anyone running these scripts simply copy the cached images from a folder in this repo or on Discover. There is a script responsible for caching the assets, but beware that it takes close to a day to complete caching for all plot types and all regions in one go. The total cache takes up 1.4 GB of disk space.
 
 #### master_cache.py
