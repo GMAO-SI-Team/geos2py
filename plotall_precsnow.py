@@ -1,4 +1,5 @@
 import os
+import csv
 import json
 import time
 import calendar
@@ -6,12 +7,12 @@ import argparse
 import numpy as np
 import cartopy.crs as ccrs
 
+from scipy.interpolate import RegularGridInterpolator
 from plotting.colormaps import Colormap
 from plotting.plots import Plotter
 from processing.regridding import regrid, congrid, read_tile_file
 from datasets import loading
 from epilogue.annotation import annotate
-from utils.directories.tiles import find_tile_file
 
 n_dates = 1
 
@@ -87,8 +88,22 @@ for _ in range(n_dates):
         for proj in projs:
             times[proj] = [] if proj not in times else times[proj]
 
+        cities = 'cities/all_cities_md.txt' if file_tag == 'maryland_mapset' else 'cities/all_cities.txt'
+        city_coords = []
+        with open(cities, 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                row = [item for item in row if item]
+                if len(row) == 4 or 'world' in cities:
+                    city_lat, city_lon = [float(coord.strip().replace('+', '')) for coord in row[2:4]]
+                    city_coords.append((city_lat, city_lon))
+
+        lons = np.linspace(-180, 180, 5760)
+        lats = np.linspace(-90, 90, 2760)
+        city_interpolator = RegularGridInterpolator((lats, lons), data, method='linear')
+
         dt0 = time.time()
-        snow_plotter = Plotter('plotall_precsnow', region, file_tag, target_proj, proj_name)
+        snow_plotter = Plotter('plotall_precsnow', region, file_tag, target_proj, proj_name, label_coords=city_coords, interpolator=city_interpolator)
         snow_plotter.render(acc_data, cmap, norm)
         # plot(region, file_tag, target_proj, proj_name, data, cmap, norm)
         # test

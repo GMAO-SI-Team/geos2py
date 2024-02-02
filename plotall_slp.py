@@ -15,7 +15,6 @@ from processing.regridding import regrid, congrid, read_tile_file
 from processing.smoothing import ideal_bandpass_filter
 from datasets import loading
 from epilogue.annotation import annotate
-from utils.directories.tiles import find_tile_file
 
 image.MAX_IMAGE_PIXELS = None
 

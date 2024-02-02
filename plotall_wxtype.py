@@ -11,7 +11,6 @@ from processing.regridding import congrid
 from processing.smoothing import savitzky_golay2d
 from datasets import loading
 from epilogue.annotation import annotate
-from utils.directories.tiles import find_tile_file
 
 t0 = time.time()
 

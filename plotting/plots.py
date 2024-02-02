@@ -171,29 +171,40 @@ class Plotter(object):
         self.ax.contourf(self.lons, self.lats, ni, transform=ccrs.PlateCarree(), cmap=ni_cmap, norm=ni_norm)
 
     def _plot_radar(self):
-        # mask = self.data < 5
-        # self.lons = np.ma.masked_where(mask, self.lons)
-        # self.lats = np.ma.masked_where(mask, self.lats)
-        # self.ax.pcolormesh(self.lons, self.lats, self.data, transform=ccrs.PlateCarree(), cmap=self.cmap, norm=self.norm)
-        # self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
-        # self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', transform=ccrs.PlateCarree())
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
 
     def _plot_rain(self):
-        levels = np.array([0.01,0.1,0.25,0.50,0.75,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5,5.0,6.0,7.0,8.0,9.0,10,12,14,16,18,20,22,24])
-        rainc = self.ax.contourf(self.lons, self.lats, self.data, transform=ccrs.PlateCarree(), levels=levels, cmap=self.cmap, norm=self.norm)
-        self.ax.clabel(rainc, inline=True, fontsize=4)
+        self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
+        for label_coord in self.label_coords:
+            y_coord, x_coord = label_coord
+            interpolated_value = self.interpolator((y_coord, x_coord))
+            if self.limit_extent:
+                x_0, x_1, y_0, y_1 = self.extent
+                if x_0 <= x_coord <= x_1 and y_0 <= y_coord <= y_1:
+                    self.ax.text(x_coord, y_coord, f'{np.round(interpolated_value).astype(int)}', color='white', clip_on=True, fontsize=1, transform=ccrs.PlateCarree())
+            else:
+                point = self.target_proj.transform_point(x_coord, y_coord, ccrs.PlateCarree())
+                if True not in np.isnan(point):
+                    self.ax.text(x_coord, y_coord, f'{np.round(interpolated_value).astype(int)}', color='white', fontsize=1, transform=ccrs.PlateCarree())
 
     def _plot_snow(self):
-        levels = np.array([0.1,0.25,0.5,0.75,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,7,8,9,10,11,12,14,16,18,20,22,24,26,28,30,32,34,36,40,44,48,52,56,60])
-        snowc = self.ax.contourf(self.lons, self.lats, self.data, transform=ccrs.PlateCarree(), levels=levels, cmap=self.cmap, norm=self.norm)
-        self.ax.clabel(snowc, inline=True, fontsize=4)
+        self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
+        for label_coord in self.label_coords:
+            y_coord, x_coord = label_coord
+            interpolated_value = self.interpolator((y_coord, x_coord))
+            if self.limit_extent:
+                x_0, x_1, y_0, y_1 = self.extent
+                if x_0 <= x_coord <= x_1 and y_0 <= y_coord <= y_1:
+                    self.ax.text(x_coord, y_coord, f'{np.round(interpolated_value).astype(int)}', color='white', clip_on=True, fontsize=1, transform=ccrs.PlateCarree())
+            else:
+                point = self.target_proj.transform_point(x_coord, y_coord, ccrs.PlateCarree())
+                if True not in np.isnan(point):
+                    self.ax.text(x_coord, y_coord, f'{np.round(interpolated_value).astype(int)}', color='white', fontsize=1, transform=ccrs.PlateCarree())
 
     def _plot_water(self):
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
 
     def _plot_pressure(self):
-        # self.ax.pcolormesh(self.lons, self.lats, self.data, transform=ccrs.PlateCarree(), cmap=self.cmap, norm=self.norm)
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         slp_min_locs, data_lons = self.label_coords
         for slp_min_loc in slp_min_locs:
@@ -230,8 +241,6 @@ class Plotter(object):
             if self.limit_extent:
                 x_0, x_1, y_0, y_1 = self.extent
                 if x_0 <= x_coord <= x_1 and y_0 <= y_coord <= y_1:
-                    # point = self.target_proj.transform_point(x_coord, y_coord, ccrs.PlateCarree())
-                    # if True not in np.isnan(point):
                     self.ax.text(x_coord, y_coord, f'{np.round(interpolated_value).astype(int)}', color=label_color, clip_on=True, fontsize=label_size, transform=ccrs.PlateCarree())
             else:
                 point = self.target_proj.transform_point(x_coord, y_coord, ccrs.PlateCarree())

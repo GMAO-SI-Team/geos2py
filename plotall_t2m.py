@@ -14,7 +14,6 @@ from plotting.plots import Plotter
 from processing.regridding import regrid, congrid, read_tile_file
 from datasets import loading
 from epilogue.annotation import annotate
-from utils.directories.tiles import find_tile_file
 
 image.MAX_IMAGE_PIXELS = None
 
