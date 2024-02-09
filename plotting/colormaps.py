@@ -9,9 +9,11 @@ class Colormap(object):
     """
     Colormap instance based on raw NetCDF variable or processed variable
     """
-    def __init__(self, plot_type, variable):
+    def __init__(self, plot_type, variable, data_min=None, data_max=None):
         self.plot_type = plot_type
         self.variable = variable
+        self.data_min = data_min
+        self.data_max = data_max
         self.set_cmap()
     
     def __repr__(self):
@@ -81,7 +83,10 @@ class Colormap(object):
         rgb = cmap_data['rgb']
         levels = cmap_data['levels']
         cmap = plt.colormaps[rgb] if type(rgb) == str else mpl.colors.ListedColormap(rgb)
-        norm = mpl.colors.BoundaryNorm(levels, cmap.N)
+        if self.plot_type == 'plotall_aerosols':
+            norm = mpl.colors.Normalize(vmin=self.data_min, vmax=self.data_max)
+        else:
+            norm = mpl.colors.BoundaryNorm(levels, cmap.N)
         self.cmap = cmap
         self.norm = norm
         self.levels = levels

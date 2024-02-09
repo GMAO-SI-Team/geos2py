@@ -161,14 +161,12 @@ class Plotter(object):
 
     def _plot_aerosols(self):
         ss, du, oc, bc, su, ni = self.data
-        ss_cmap, du_cmap, oc_cmap, bc_cmap, su_cmap, ni_cmap = self.cmap
-        ss_norm, du_norm, oc_norm, bc_norm, su_norm, ni_norm = self.norm
-        self.ax.contourf(self.lons, self.lats, ss, transform=ccrs.PlateCarree(), cmap=ss_cmap, norm=ss_norm)
-        self.ax.contourf(self.lons, self.lats, du, transform=ccrs.PlateCarree(), cmap=du_cmap, norm=du_norm)
-        self.ax.contourf(self.lons, self.lats, oc, transform=ccrs.PlateCarree(), cmap=oc_cmap, norm=oc_norm)
-        self.ax.contourf(self.lons, self.lats, bc, transform=ccrs.PlateCarree(), cmap=bc_cmap, norm=bc_norm)
-        self.ax.contourf(self.lons, self.lats, su, transform=ccrs.PlateCarree(), cmap=su_cmap, norm=su_norm)
-        self.ax.contourf(self.lons, self.lats, ni, transform=ccrs.PlateCarree(), cmap=ni_cmap, norm=ni_norm)
+        self.ax.imshow(ss, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
+        self.ax.imshow(du, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
+        self.ax.imshow(oc, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
+        self.ax.imshow(bc, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
+        self.ax.imshow(su, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
+        self.ax.imshow(ni, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
 
     def _plot_radar(self):
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
