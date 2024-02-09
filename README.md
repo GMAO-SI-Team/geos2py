@@ -60,11 +60,11 @@ If you are working locally, the dependencies are:
 - average time 'nsper': 0.0 hours 0.0 minutes 10.888549625873566 seconds
 
 #### plotall_aerosols
-- average time 'sub': 0.0 hours 0.0 minutes 44.988757967948914 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 49.70231854915619 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 54.258335852622984 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 52.02851929664612 seconds
-- average time 'nsper': 0.0 hours 1.0 minutes 1.7357015013694763 seconds
+- average time 'sub': 0.0 hours 0.0 minutes 43.48659408092499 seconds
+- average time 'ortho': 0.0 hours 1.0 minutes 12.818154454231262 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 54.68324718475342 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 55.37871561050415 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 49.24169617891312 seconds
 
 #### plotall_slp
 - pending

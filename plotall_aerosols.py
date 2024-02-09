@@ -50,20 +50,22 @@ oc = loading.load_cube(data_dir, 'OCEXTTAU', 1e15, no_map_set=True).data
 bc = loading.load_cube(data_dir, 'BCEXTTAU', 1e15, no_map_set=True).data
 su = loading.load_cube(data_dir, 'SUEXTTAU', 1e15, no_map_set=True).data
 ni = loading.load_cube(data_dir, 'NIEXTTAU', 1e15, no_map_set=True).data
+# png_dims = (2760 * 4, 5760 * 4) if region
 aerosols = [congrid(aerosol, (2760, 5760), method='nearest', center=True) for aerosol in [ss, du, oc, bc, su, ni]]
+print(f'finished regridding: {time.time() - t0} seconds')
 
-ss_cmap = Colormap('plotall_aerosols', 'SSEXTTAU', data_min=ss.min(), data_max=ss.max()).cmap
-ss_norm = Colormap('plotall_aerosols', 'SSEXTTAU', data_min=ss.min(), data_max=ss.max()).norm
-du_cmap = Colormap('plotall_aerosols', 'DUEXTTAU', data_min=du.min(), data_max=du.max()).cmap
-du_norm = Colormap('plotall_aerosols', 'DUEXTTAU', data_min=du.min(), data_max=du.max()).norm
-oc_cmap = Colormap('plotall_aerosols', 'OCEXTTAU', data_min=oc.min(), data_max=oc.max()).cmap
-oc_norm = Colormap('plotall_aerosols', 'OCEXTTAU', data_min=oc.min(), data_max=oc.max()).norm
-bc_cmap = Colormap('plotall_aerosols', 'BCEXTTAU', data_min=bc.min(), data_max=bc.max()).cmap
-bc_norm = Colormap('plotall_aerosols', 'BCEXTTAU', data_min=bc.min(), data_max=bc.max()).norm
-su_cmap = Colormap('plotall_aerosols', 'SUEXTTAU', data_min=su.min(), data_max=su.max()).cmap
-su_norm = Colormap('plotall_aerosols', 'SUEXTTAU', data_min=su.min(), data_max=su.max()).norm
-ni_cmap = Colormap('plotall_aerosols', 'NIEXTTAU', data_min=ni.min(), data_max=ni.max()).cmap
-ni_norm = Colormap('plotall_aerosols', 'NIEXTTAU', data_min=ni.min(), data_max=ni.max()).norm
+ss_cmap = Colormap('plotall_aerosols', 'SSEXTTAU', data_min=0, data_max=0.5).cmap
+ss_norm = Colormap('plotall_aerosols', 'SSEXTTAU', data_min=0, data_max=0.5).norm
+du_cmap = Colormap('plotall_aerosols', 'DUEXTTAU', data_min=0, data_max=0.5).cmap
+du_norm = Colormap('plotall_aerosols', 'DUEXTTAU', data_min=0, data_max=0.5).norm
+oc_cmap = Colormap('plotall_aerosols', 'OCEXTTAU', data_min=0, data_max=0.5).cmap
+oc_norm = Colormap('plotall_aerosols', 'OCEXTTAU', data_min=0, data_max=0.5).norm
+bc_cmap = Colormap('plotall_aerosols', 'BCEXTTAU', data_min=0, data_max=0.5).cmap
+bc_norm = Colormap('plotall_aerosols', 'BCEXTTAU', data_min=0, data_max=0.5).norm
+su_cmap = Colormap('plotall_aerosols', 'SUEXTTAU', data_min=0, data_max=0.5).cmap
+su_norm = Colormap('plotall_aerosols', 'SUEXTTAU', data_min=0, data_max=0.5).norm
+ni_cmap = Colormap('plotall_aerosols', 'NIEXTTAU', data_min=0, data_max=0.5).cmap
+ni_norm = Colormap('plotall_aerosols', 'NIEXTTAU', data_min=0, data_max=0.5).norm
 
 ss, du, oc, bc, su, ni = aerosols
 
@@ -82,9 +84,9 @@ oc_blend = oc_sm.to_rgba(oc)
 oc_blend[:, :, 3] = bytscl(oc, low=0, high=0.25)
 bc_blend = bc_sm.to_rgba(bc)
 bc_blend[:, :, 3] = bytscl(bc, low=0, high=0.25)
-su_blend = ss_sm.to_rgba(su)
+su_blend = su_sm.to_rgba(su)
 su_blend[:, :, 3] = bytscl(su, low=0, high=0.25)
-ni_blend = ss_sm.to_rgba(ni)
+ni_blend = ni_sm.to_rgba(ni)
 ni_blend[:, :, 3] = bytscl(ni, low=0, high=0.25)
 
 data = [ss_blend, du_blend, oc_blend, bc_blend, su_blend, ni_blend]

@@ -163,10 +163,10 @@ class Plotter(object):
         ss, du, oc, bc, su, ni = self.data
         self.ax.imshow(ss, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
         self.ax.imshow(du, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
+        self.ax.imshow(ni, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
+        self.ax.imshow(su, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
         self.ax.imshow(oc, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
         self.ax.imshow(bc, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
-        self.ax.imshow(su, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
-        self.ax.imshow(ni, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
 
     def _plot_radar(self):
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
