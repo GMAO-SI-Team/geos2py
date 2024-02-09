@@ -291,10 +291,12 @@ def cache_plotall_aerosols(region, file_tag, element=None):
         print(f'{file_tag} features saved successfully')
     if element in ('base_image', None):
         print(f'starting {file_tag} natural earth base image')
-        natural_earth = f'{base_images}/eo_base_2020_clean_geo.3x21600x10800.jpg'
+        natural_earth = f'{base_images}/natural_earth_grey_16200x8100.jpeg'
         fig = plt.figure(dpi=1500)
         ax = plt.axes(projection=target_proj)
         img = plt.imread(natural_earth)
+        if proj in ('ortho', 'laea'):
+            ax.set_extent(region_info[region]['extent'], ccrs.PlateCarree())
         if file_tag in ('australia_mapset', 'southamerica_mapset'):
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree(), cmap='gray', vmin=0, vmax=255)
         else:

@@ -5,8 +5,8 @@ from scipy.io import FortranFile
 from sunpy.image import resample
 from numba import jit, float32, float64, int64, int32
 
-def congrid(data, shape, center=True):
-    return resample.resample(data, shape, center=center)
+def congrid(data, shape, center=True, method='linear'):
+    return resample.resample(data, shape, center=center, method=method)
 
 def regrid(data, method='conservative', gridspec=None, undef=1e15):
     """
