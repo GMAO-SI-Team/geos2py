@@ -1,12 +1,10 @@
 import numpy as np
 import scipy.signal
-import scipy.ndimage
-import scipy.interpolate
-from scipy.fft import fft2, ifft2, fftshift, ifftshift
+from scipy.fft import fftshift, ifftshift, fftn, ifftn
 
-def savitzky_golay2d(z, window_size, order, derivative=None):
+def savitzky_golay2d(z: np.ndarray, window_size: int, order: int, derivative=None) -> np.ndarray:
     """
-    A low pass filter for smoothing data
+    A low pass filter for smoothing data implementing the Savitzky Golay algorithm
     """
     # number of terms in the polynomial expression
     n_terms = (order + 1) * (order + 2) / 2.0
@@ -83,52 +81,121 @@ def savitzky_golay2d(z, window_size, order, derivative=None):
         c = np.linalg.pinv(A)[1].reshape((window_size, -1))
         r = np.linalg.pinv(A)[2].reshape((window_size, -1))
         return scipy.signal.fftconvolve(Z, -r, mode='valid'), scipy.signal.fftconvolve(Z, -c, mode='valid')
+
+def dist(n: list, m=None) -> np.ndarray:
+    """
+    Return a rectangular array in which each pixel represents the Euclidean distance from the origin.
+
+    Parameters:
+    - n (list or tuple): A list or tuple containing a single integer representing the size of the array.
+    - m (list or tuple, optional): A list or tuple containing a single integer representing the size of the array 
+                                   along the second dimension. If not provided, defaults to the same value as n.
+
+    Returns:
+    - numpy.ndarray: A 2D array representing the Euclidean distances.
+
+    Example:
+    >>> n_val = 10
+    >>> m_val = 6
+    >>> result = dist([n_val], [m_val])
+    >>> print(result)
+    [[0.         1.          2.          3.          4.          5.          4.          3.          2.          1.        ]
+     [1.         1.41421356  2.23606798  3.16227766  4.12310563  5.09901951  4.12310563  3.16227766  2.23606798  1.41421356]
+     [2.         2.23606798  2.82842712  3.60555128  4.47213595  5.38516481  4.47213595  3.60555128  2.82842712  2.23606798]
+     [3.         3.16227766  3.60555128  4.24264069  5.          5.83095189  5.          4.24264069  3.60555128  3.16227766]
+     [2.         2.23606798  2.82842712  3.60555128  4.47213595  5.38516481  4.47213595  3.60555128  2.82842712  2.23606798]
+     [1.         1.41421356  2.23606798  3.16227766  4.12310563  5.09901951  4.12310563  3.16227766  2.23606798  1.41421356]]
+    """
+
+    n1 = n[0]
+    m1 = n1 if m is None or len(m) <= 0 else m[0]
+    x = np.arange(n1)  # Make a row
+    x = np.concatenate([x[x < (10 - x)], (10 - x)[(10 - x) <= x]]) ** 2 # Squared rows
+
+    a = np.zeros((m1, n1))  # Make array
+
+    for i in range(m1 // 2 + 1):  # Row loop
+        y = np.sqrt(x + i**2)  # Euclidean distance
+        a[i, :] = y  # Insert the row
+        if i != 0:
+            a[m1 - i, :] = y  # Symmetrical
+    return a
+
+def bandpass_filter(input_array: np.ndarray, low_freq: float, high_freq: float, ideal=False, butterworth=None, gaussian=False) -> np.ndarray:
+    """
+    This implementation is derived from bandpass_filter.pro in IDL lib subdirectory.
+
+    Apply a bandpass filter to the input array in the frequency domain.
+
+    Parameters:
+    - input_array (ndarray): Input array to be filtered.
+    - low_freq (float): Lower cutoff frequency of the bandpass filter (normalized frequency, [0, 1]).
+    - high_freq (float): Upper cutoff frequency of the bandpass filter (normalized frequency, [0, 1]).
+    - ideal (bool, optional): If True, use an ideal bandpass filter. Default is False.
+    - butterworth (int, optional): If provided, use a Butterworth filter of the given order. Default is None.
+    - gaussian (bool, optional): If True, use a Gaussian bandpass filter. Default is False.
+
+    Returns:
+    - ndarray: Filtered array.
+    """
+
+    # Handle all the flags
+    if sum([ideal, butterworth is not None, gaussian]) != 1:
+        raise ValueError('Only set one of IDEAL, BUTTERWORTH, or GAUSSIAN.')
     
-# def ideal_bandpass_filter(signal, lowcut, highcut):
-#     fft_signal = np.fft.fft(signal)
-#     frequencies = np.fft.fftfreq(len(signal))
-
-#     # Create an ideal bandpass filter
-#     ideal_filter = np.zeros_like(frequencies)
-#     ideal_filter[(frequencies >= lowcut) & (frequencies <= highcut)] = 1
-
-#     # Reshape filter to column vector for broadcasting
-#     ideal_filter = ideal_filter.reshape(-1, 1)
-
-#     # Apply the filter to the frequency domain representation of the signal
-#     filtered_signal = fft_signal * ideal_filter
-
-#     # Inverse Fourier transform to get back to the time domain
-#     filtered_signal = np.fft.ifft(filtered_signal)
-
-#     return np.real(filtered_signal)
-
-def ideal_bandpass_filter(img, low_cutoff, high_cutoff):
-    rows, cols = img.shape
-    crow, ccol = rows // 2, cols // 2
-
-    # Ensure integer values for slicing
-    crow, ccol = int(crow), int(ccol)
-
-    # Fourier transform
-    f_transform = fft2(img)
-    f_transform_shifted = fftshift(f_transform)
-
-    # Ideal bandpass filter
-    mask = np.zeros_like(img)
+    if len(input_array.shape) != 2:
+        raise ValueError('Input must be a two-dimensional array.')
     
-    if isinstance(high_cutoff, int):
-        high_cutoff = int(high_cutoff)
-    elif isinstance(high_cutoff, float):
-        high_cutoff = int(high_cutoff * min(crow, ccol))  # Scale based on image dimensions
-
-    mask[crow - high_cutoff:crow + high_cutoff, ccol - high_cutoff:ccol + high_cutoff] = 1
-    mask[crow - int(low_cutoff):crow + int(low_cutoff), ccol - int(low_cutoff):ccol + int(low_cutoff)] = 0
-
-    # Apply the filter
-    f_transform_shifted_filtered = f_transform_shifted * mask
-
-    # Inverse Fourier transform
-    img_filtered = ifft2(ifftshift(f_transform_shifted_filtered)).real
-
-    return img_filtered
+    if butterworth is None:
+        butterworth = 1
+    
+    if low_freq is None or high_freq is None:
+        raise ValueError('Flow and Fhigh must be supplied.')
+    
+    if low_freq > 1 or low_freq < 0 or high_freq > 1 or high_freq < 0:
+        raise ValueError('Frequency is out of range ([0,1]).')
+    
+    if high_freq < low_freq:
+        raise ValueError('Fhigh must be greater than Flow.')
+    
+    if butterworth <= 0:
+        raise ValueError('Butterworth dimension must be a positive value.')
+    
+    # Perform Fourier Transform
+    fourier_transform = fftn(input_array, axes=(0, 1))
+    fourier_transform = fftshift(fourier_transform)
+    
+    # Compute distance matrix
+    dimensions = np.array(input_array.shape)
+    dist_matrix = dist([dimensions[1]], [dimensions[0]])
+    dist_matrix = np.roll(dist_matrix, dimensions[0] // 2 + 1, axis=1)
+    dist_matrix = np.roll(dist_matrix, dimensions[1] // 2 + 1, axis=0)
+    dist_matrix /= np.max(dist_matrix)
+    
+    # Compute filter function based on flags
+    D = dist_matrix
+    W = high_freq - low_freq
+    D0 = (high_freq + low_freq) / 2.0
+    
+    if ideal:
+        H = np.where((low_freq > D) | (high_freq < D), 0, 1)
+    elif butterworth is not None:
+        if low_freq != 0 and high_freq != 1:
+            H = 1.0 - 1.0 / (1 + ((D * W) / (D ** 2 - D0 ** 2)) ** (2 * butterworth))
+        elif low_freq == 0:
+            H = 1.0 / (1 + (D / high_freq) ** (2 * butterworth))
+        else:
+            H = 1.0 / (1 + (low_freq / D) ** (2 * butterworth))
+    else:  # gaussian
+        if low_freq != 0 and high_freq != 1:
+            H = np.exp(-(((D ** 2 - D0 ** 2) / (D * W)) ** 2))
+        elif low_freq == 0:
+            H = np.exp(-(D ** 2 / (2 * high_freq ** 2)))
+        else:
+            H = 1.0 - np.exp(-(D ** 2 / (2 * low_freq ** 2)))
+    
+    result_fourier = H * fourier_transform
+    
+    # Inverse Fourier Transform
+    result = ifftn(ifftshift(result_fourier), axes=(0, 1)).real
+    return result

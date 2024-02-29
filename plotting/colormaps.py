@@ -9,7 +9,16 @@ class Colormap(object):
     """
     Colormap instance based on raw NetCDF variable or processed variable
     """
-    def __init__(self, plot_type, variable, data_min=None, data_max=None):
+    def __init__(self, plot_type: str, variable: str, data_min=None, data_max=None):
+        """
+        Initializes Colormap object with plot type, variable, and optional data range.
+        
+        Parameters:
+        - plot_type (str): Type of plot.
+        - variable (str): Type of variable.
+        - data_min (float, optional): Minimum data value. Defaults to None.
+        - data_max (float, optional): Maximum data value. Defaults to None.
+        """
         self.plot_type = plot_type
         self.variable = variable
         self.data_min = data_min
@@ -17,6 +26,9 @@ class Colormap(object):
         self.set_cmap()
     
     def __repr__(self):
+        """
+        Returns a string representation of the Colormap object.
+        """
         state = self.variable in ('snow', 'rain', 'frzr', 'ice', 'vort', 'spd')
         state_dict = {
             True: 'processed',
@@ -30,7 +42,11 @@ class Colormap(object):
     # inner values -> associated cmap definition function
     # function returns dict(rgb/cmap, levels)
     def set_cmap(self):
+        """
+        Sets the colormap based on plot type and variable type.
+        """
         self.cmap_dict = {
+            # Dictionary mapping plot types to variable types and associated functions
             'plotall_ir8': {
                 'TBISCCP': self._set_TBISCCP
             },
@@ -92,6 +108,9 @@ class Colormap(object):
         self.levels = levels
 
     def _set_TBISCCP(self):
+        """
+        Sets colormap for TBISCCP plot type.
+        """
         color_table = 'NESDIS_IR_10p3micron.txt'
         rgb = []
         with open(f'colortables/{color_table}', 'r') as infile:
@@ -109,6 +128,9 @@ class Colormap(object):
     
     @staticmethod
     def _set_levels_wxtype(func):
+        """
+        Decorator to set levels for weather type colormaps.
+        """
         def setter(*args):
             prec_dict = func(*args)
             levels = np.array([0.01, 0.02, 0.03, 0.05, 0.10, 0.25, 0.5, 1.0])
@@ -118,6 +140,9 @@ class Colormap(object):
 
     @_set_levels_wxtype
     def _set_snow(self):
+        """
+        Sets colormap for snow data.
+        """
         rgb_snow = np.array([
             [172,196,225],
             [118,172,204],
@@ -132,6 +157,9 @@ class Colormap(object):
 
     @_set_levels_wxtype
     def _set_rain(self):
+        """
+        Sets colormap for rain data.
+        """
         rgb_rain = np.array([
             [114,198,114],
             [ 38,136, 67],
@@ -146,6 +174,9 @@ class Colormap(object):
 
     @_set_levels_wxtype
     def _set_frzr(self):
+        """
+        Sets colormap for freezing rain data.
+        """
         rgb_frzr= np.array([
             [253,169,195],
             [252,119,154],
@@ -160,6 +191,9 @@ class Colormap(object):
 
     @_set_levels_wxtype
     def _set_ice(self):
+        """
+        Sets colormap for ice data.
+        """
         rgb_ice = np.array([
             [242,179,251],
             [228,144,249],
@@ -173,6 +207,9 @@ class Colormap(object):
         return {'rgb': rgb_ice}
 
     def _set_DBZ_MAX(self):
+        """
+        Sets colormap for radar data.
+        """
         rgb = np.array([
             [255, 255, 255],
             [0, 224, 227],
@@ -195,6 +232,9 @@ class Colormap(object):
 
     @staticmethod
     def _set_levels_aerosols(func):
+        """
+        Decorator to set levels for aerosol colormaps.
+        """
         def setter(*args):
             prec_dict = func(*args)
             levels = np.array([0, 0.5])
@@ -204,18 +244,30 @@ class Colormap(object):
 
     @_set_levels_aerosols
     def _set_SSEXTTAU(self):
+        """
+        Sets colormap for seasalt data.
+        """
         return {'rgb': 'Blues'}
     
     @_set_levels_aerosols
     def _set_DUEXTTAU(self):
+        """
+        Sets colormap for dust data.
+        """
         return {'rgb': 'YlOrBr'}
 
     @_set_levels_aerosols
     def _set_OCEXTTAU(self):
+        """
+        Sets colormap for organic carbon data.
+        """
         return {'rgb': 'Greens'}
     
     @_set_levels_aerosols
     def _set_BCEXTTAU(self):
+        """
+        Sets colormap for black carbon data.
+        """
         color = np.array([75, 5, 200]) / 255
         r, g, b = color
         rgb = np.zeros((256, 3))
@@ -226,10 +278,16 @@ class Colormap(object):
     
     @_set_levels_aerosols
     def _set_SUEXTTAU(self):
+        """
+        Sets colormap for sulfate data.
+        """
         return {'rgb': 'RdPu'}
     
     @_set_levels_aerosols
     def _set_NIEXTTAU(self):
+        """
+        Sets colormap for nitrate data.
+        """
         color = np.array([255, 255, 50]) / 255
         r, g, b = color
         rgb = np.zeros((256, 3))
@@ -239,6 +297,9 @@ class Colormap(object):
         return {'rgb': rgb}
     
     def _set_PRECTOT(self):
+        """
+        Sets colormap for accumulated rain data.
+        """
         rgb = np.array([
             [255, 255, 255],
             [175, 210, 235],
@@ -278,6 +339,9 @@ class Colormap(object):
         return {'rgb': rgb, 'levels': levels}
     
     def _set_PRECSNO(self):
+        """
+        Sets colormap for accumulated snow data.
+        """
         rgb = np.array([
             [221,221,221], 
             [193,193,193], 
@@ -332,6 +396,9 @@ class Colormap(object):
         return {'rgb': rgb, 'levels': levels}
     
     def _set_SLP(self):
+        """
+        Sets colormap for sea level pressure data.
+        """
         rgb = np.array([
             [250,250,250], 
             [225,225,225], 
@@ -379,6 +446,9 @@ class Colormap(object):
         return {'rgb': rgb, 'levels': levels}
     
     def _set_T2M(self):
+        """
+        Sets colormap for 2-meter temperature data.
+        """
         rgb = np.array([
             [ 30, 30, 75], 
             [ 60, 60,125], 
@@ -422,6 +492,9 @@ class Colormap(object):
         return {'rgb': rgb, 'levels': levels}
 
     def _set_TQV(self):
+        """
+        Sets colormap for total precipitable water data.
+        """
         with open('colortables/MPL_terrain.rgb', 'r') as infile:
             rgb = infile.readlines()[2:]
         rgb = [line.strip() for line in rgb]
@@ -432,6 +505,9 @@ class Colormap(object):
         return {'rgb': rgb, 'levels': levels}
 
     def _set_CAPE(self):
+        """
+        Sets colormap for surface CAPE data.
+        """
         rgb = np.array([
             [200,200,200], 
             [160,160,160], 
@@ -466,6 +542,9 @@ class Colormap(object):
         return {'rgb': rgb, 'levels': levels}
 
     def _set_vort(self):
+        """
+        Sets colormap for 500mb vorticity data.
+        """
         with open('colortables/005_STD_GAMMA-II.dat', 'r') as infile:
             rgb = infile.readlines()
         rgb = [line.strip() for line in rgb]
@@ -474,6 +553,9 @@ class Colormap(object):
         return {'rgb': rgb, 'levels': np.arange(61)}
     
     def _set_spd(self):
+        """
+        Sets colormap for 10-meter winds data.
+        """
         rgb = np.array([
             [240,240,240], 
             [210,210,210], 

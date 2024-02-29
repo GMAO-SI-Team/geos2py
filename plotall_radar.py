@@ -12,7 +12,10 @@ from processing.regridding import regrid, congrid, read_tile_file
 from datasets import loading
 from epilogue.annotation import annotate
 
+# Start timer
 t0 = time.time()
+
+# Parse command line arguments to specify data source
 parser = argparse.ArgumentParser(description='Process date specified data')
 parser.add_argument('year')
 parser.add_argument('month')
@@ -25,7 +28,6 @@ parser.add_argument('data_dir')
 parser.add_argument('stream')
 parser.add_argument('--region')
 parser.add_argument('--f_date')
-# parser.add_argument('--use_test_dirs')
 args = parser.parse_args()
 
 year = args.year
@@ -40,48 +42,42 @@ f_date = args.f_date if args.f_date else f'{year}{month}{day}_{hour}z'
 s_tag = args.s_tag if args.s_tag else f'f5295_fp-{f_date}'
 stream = args.stream
 data_dir = args.data_dir
-# override = True if args.use_test_dirs else False
-# data_dir = 'data/GEOS.fp.fcst.inst_30mn_met_c0720sfc.20230529_12+20230529_1200.V01.nc4' #if override else args.data_dir
 
+data_dir = f'{data_dir}/GEOS.fp.fcst.inst_30mn_met_c0720sfc.{f_date[:-1]}+{f_date[:-1]}{minute}.V01.nc4'
+
+# Define the radar colormap and normalization
 radar_cmap = Colormap('plotall_radar', 'DBZ_MAX')
 cmap = radar_cmap.cmap
 norm = radar_cmap.norm
 
-data_dir = f'{data_dir}/GEOS.fp.fcst.inst_30mn_met_c0720sfc.{f_date[:-1]}+{f_date[:-1]}{minute}.V01.nc4'
-
-# if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd(): 
-#     if '_fp' in s_tag:
-#         fname = f'{data_dir}/Y{year}/M{month}/D{day}/H{hour}/GEOS.fp.fcst.inst_30mn_met_c0720sfc.'
-#         fname += f'{f_date}{year}{month}{day}_{hour}{minute}.V01.nc4'
-
-#     hwtfile = fname.replace(stream, 'hwt_15mn_slv_LCC')
-#     if 'hwt_15mn_slv_LCC' in hwtfile and os.path.exists(hwtfile):
-#         lcc_data, lcc_lons, lcc_lats = loading.load_lcc(hwtfile, 'REFC')
-
+# Read and extract the data
 cube = loading.load_cube(data_dir, 'DBZ_MAX', 1e15, no_map_set=True)
-# tile_file = find_tile_file(720, 720) if not override else 'data/DC2880xPC1441_CF0720x6C.bin'
 if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
     tile_file = '/discover/nobackup/ltakacs/bcs/Ganymed-4_0/Ganymed-4_0_Ostia/Shared/DC2880xPC1441_CF0720x6C.bin'
 else:
     tile_file = 'tiles/DC2880xPC1441_CF0720x6C.bin'
 gridspec = read_tile_file(tile_file)
+
+# First order conservative regridding using 4320x720 to 2880x1441 gridspec
 data = regrid(cube.data, method='conservative', gridspec=gridspec, undef=1e15)
 data = loading.clean_data(data, undef=1e15)
 data = congrid(data, (2760, 5760), center=True)
 
+# Mask data values below 5 (the lower bound)
 mask = data < 5
 data = np.ma.masked_where(mask, data)
 
+# Open regions JSON
 with open('regions.json', 'r') as infile:
     region_info = json.load(infile)
 
+# Set region(s)
 regions = region_info[region] if region in ('0', '-1') else [region] 
-# regions = [50, 89, 53, 51, 49, 65, 66, 67, 68, 69, 70, 73, 74, 75, 34, 35, 42, 43, 44, 46, 47, 71, 72]
-# regions = [34, 35, 42, 43, 44, 46, 47, 71, 72]
 
 times = {}
 
 for region in regions:
+    # Define plot parameters for specified region
     region = str(region)
     file_tag = region_info[region]['file_tag']
     lon_cen, lat_cen = region_info[region]['center']
@@ -98,10 +94,14 @@ for region in regions:
     for proj in projs:
         times[proj] = [] if proj not in times else times[proj]
 
+    # Start regional timer
     dt0 = time.time()
+
+    # Initialize radar plotter and plot data
     radar_plotter = Plotter('plotall_radar', region, file_tag, target_proj, proj_name)
     radar_plotter.render(data, cmap, norm)
-    # test
+    
+    # Set image annotation text
     forecast_hours = f'000 Forecast Hours'
     forecast_hours = f'{forecast_hours}\n INIT: {f_date}'
     forecast_p_tag = f'GEOS {s_tag.split("-")[0]}'
@@ -114,12 +114,16 @@ for region in regions:
     satellite = ['geos', 'nsper']
     mode = 'dark' if proj_name in satellite else 'light'
 
+    # Annotate final image
     annotate(f'tmp/{proj_name}-radar-{file_tag}.png', 'plotall_radar', mode=mode, forecast=forecast_str, date=date_index)
     print(f'{file_tag} saved successfully')
+
+    # Record region time
     times[proj_name].append(time.time() - dt0)
 
 t = time.time() - t0
 
+# Evalute total compute time and average plotting time by projection type
 print(f'total run time: {t // 3600} hours {t % 3600 // 60} minutes {t % 3600 % 60} seconds')
 for proj in times:
     if times[proj]:

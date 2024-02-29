@@ -13,6 +13,10 @@ import matplotlib.pyplot as plt
 import cartopy.feature as cfeature
 from pyogrio import read_dataframe
 
+# Parse command line arguments
+# plot_type: specifies plots to cache (ex: plotall_ir8)
+# region: specifies region to cache for specified plot type (ex: usa_mapset)
+# element (optional): accepts base_image (natural Earth backgrounds) and features (coastlines, borders, etc.) 
 parser = argparse.ArgumentParser(description='Get base image information')
 parser.add_argument('plot_type')
 parser.add_argument('region')
@@ -23,19 +27,26 @@ plot_type = args.plot_type
 region = args.region
 element = args.element if args.element and args.element in ('features', 'base_image') else None
 
-# regions = ['usa_mapset', 'centralusa_mapset', 'midatlantic_mapset', 'maryland_mapset', 'northatlantic_mapset', 'europe_mapset', 'asia_mapset', 'australia_mapset', 'africa_mapset', 'southamerica_mapset', 'northamerica_mapset', 'epacific_mapset', 'indianocean_mapset', 'westatlantic_mapset', 'northamerica_proj', 'westpacific_proj', 'goeseast_proj', 'goeswest_proj', 'meteosat8_proj', 'meteosat10_proj', 'himawari_proj', 'nh_proj', 'sh_proj'] if region == 'all' else [region]
-regions = [str(x) for x in [50, 89, 53, 51, 49, 65, 66, 67, 68, 69, 70, 73, 74, 75, 34, 35, 42, 43, 44, 46, 47, 71, 72]] if region == 'all' else [str(region)]
+regions = [str(x) for x in ['globe', 50, 89, 53, 51, 49, 65, 66, 67, 68, 69, 70, 73, 74, 75, 34, 35, 42, 43, 44, 46, 47, 71, 72]] if region == 'all' else [str(region)]
 plot_types = ['plotall_ir8', 'plotall_wxtype', 'plotall_radar', 'plotall_aerosols', 'plotall_precrain', 'plotall_precsnow', 'plotall_slp', 'plotall_t2m', 'plotall_tpw', 'plotall_cape', 'plotall_vort500mb', 'plotall_winds10m'] if plot_type == 'all' else [plot_type]
 
+# Allows for large images
 image.MAX_IMAGE_PIXELS = None
 
 with open('regions.json', 'r') as infile:
     region_info = json.load(infile)
 
-shp_path = '/Users/qcambrel/Desktop/gmaopy/SHAPE_FILES'
-base_images = '/Users/qcambrel/Desktop/gmaopy/base_images'
+# Designates paths for the base images and shapefiles
+shp_path = '/discover/nobackup/qcambrel/gmaopy/SHAPE_FILES'
+base_images = '/discover/nobackup/qcambrel/gmaopy/base_images'
 
-def get_coastlines():
+def get_coastlines() -> gpd.GeoDataFrame:
+    """
+    Get coastlines geometries.
+
+    Returns:
+    - geopandas.GeoDataFrame: Coastlines geometries.
+    """
     if os.path.exists('cache/coastlines'):
             with open('cache/coastlines', 'rb') as picklefile:
                 coastlines = pickle.load(picklefile)
@@ -54,7 +65,13 @@ def get_coastlines():
             pickle.dump(coastlines, picklefile)
     return coastlines
 
-def get_states():
+def get_states() -> gpd.GeoDataFrame:
+    """
+    Get states geometries.
+
+    Returns:
+    - geopandas.GeoDataFrame: States geometries.
+    """
     if os.path.exists('cache/states'):
         with open('cache/states', 'rb') as picklefile:
             states = pickle.load(picklefile)
@@ -65,7 +82,13 @@ def get_states():
             pickle.dump(states, picklefile)
     return states
 
-def get_countries():
+def get_countries() -> gpd.GeoDataFrame:
+    """
+    Get countries geometries.
+
+    Returns:
+    - geopandas.GeoDataFrame: Countries geometries.
+    """
     if os.path.exists('cache/countries'):
         with open('cache/countries', 'rb') as picklefile:
             countries = pickle.load(picklefile)
@@ -76,7 +99,13 @@ def get_countries():
             pickle.dump(countries, picklefile)
     return countries
 
-def get_roads():
+def get_roads() -> gpd.GeoDataFrame:
+    """
+    Get roads geometries.
+
+    Returns:
+    - geopandas.GeoDataFrame: Roads geometries.
+    """
     if os.path.exists('cache/roads'):
         with open('cache/roads', 'rb') as picklefile:
             roads = pickle.load(picklefile)
@@ -87,7 +116,13 @@ def get_roads():
             pickle.dump(roads, picklefile)
     return roads
 
-def get_counties():
+def get_counties() -> gpd.GeoDataFrame:
+    """
+    Get counties geometries.
+
+    Returns:
+    - geopandas.GeoDataFrame: Counties geometries.
+    """
     if os.path.exists('cache/counties'):
         with open('cache/counties', 'rb') as picklefile:
             counties = pickle.load(picklefile)
@@ -99,6 +134,9 @@ def get_counties():
     return counties
 
 def generate_white_blue_bg():
+    """
+    Generate white-blue background image for plotall_precrain and plotall_precsnow.
+    """
     fig = plt.figure(dpi=1500)
     ax = plt.axes(projection=ccrs.PlateCarree())
     ocean_color = mpl.colors.rgb2hex(np.array([190,232,255]) / 255)
@@ -112,9 +150,19 @@ def generate_white_blue_bg():
     plt.close()
     print('white blue background saved successfully')
 
-def cache_plotall_ir8(region, file_tag, element=None):
+def cache_plotall_ir8(region: str, file_tag: str, element=None):
+    """
+    Cache plotall_ir8 image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -147,8 +195,18 @@ def cache_plotall_ir8(region, file_tag, element=None):
         print(f'{file_tag} features saved successfully')
     
 def cache_plotall_wxtype(region, file_tag, element=None):
+    """
+    Cache plotall_wxtype image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -186,7 +244,7 @@ def cache_plotall_wxtype(region, file_tag, element=None):
         fig = plt.figure(dpi=1500)
         ax = plt.axes(projection=target_proj)
         img = plt.imread(natural_earth)
-        if file_tag in ('australia_mapset', 'southamerica_mapset'):
+        if file_tag in ('australia_mapset', 'southamerica_mapset', 'globe'):
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         else:
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree(), regrid_shape=(2760, 5760))
@@ -198,8 +256,18 @@ def cache_plotall_wxtype(region, file_tag, element=None):
         print(f'{file_tag} base image saved successfully')
     
 def cache_plotall_radar(region, file_tag, element=None):
+    """
+    Cache plotall_radar image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -243,7 +311,7 @@ def cache_plotall_radar(region, file_tag, element=None):
         fig = plt.figure(dpi=1500)
         ax = plt.axes(projection=target_proj)
         img = plt.imread(natural_earth)
-        if file_tag in ('australia_mapset', 'southamerica_mapset'):
+        if file_tag in ('australia_mapset', 'southamerica_mapset', 'globe'):
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         else:
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree(), regrid_shape=(2760, 5760))
@@ -255,8 +323,18 @@ def cache_plotall_radar(region, file_tag, element=None):
         print(f'{file_tag} base image saved successfully')
 
 def cache_plotall_aerosols(region, file_tag, element=None):
+    """
+    Cache plotall_aerosols image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -297,7 +375,7 @@ def cache_plotall_aerosols(region, file_tag, element=None):
         img = plt.imread(natural_earth)
         if proj in ('ortho', 'laea'):
             ax.set_extent(region_info[region]['extent'], ccrs.PlateCarree())
-        if file_tag in ('australia_mapset', 'southamerica_mapset'):
+        if file_tag in ('australia_mapset', 'southamerica_mapset', 'globe'):
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree(), cmap='gray', vmin=0, vmax=255)
         else:
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree(), regrid_shape=(2760, 5760), cmap='gray', vmin=0, vmax=255)
@@ -307,8 +385,18 @@ def cache_plotall_aerosols(region, file_tag, element=None):
         print(f'{file_tag} base image saved successfully')
 
 def cache_plotall_precrain(region, file_tag, element=None):
+    """
+    Cache plotall_precrain image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -356,7 +444,7 @@ def cache_plotall_precrain(region, file_tag, element=None):
         if proj in ('ortho', 'laea'):
             ax.set_extent(region_info[region]['extent'], ccrs.PlateCarree())
         img = plt.imread(natural_earth)
-        if file_tag in ('australia_mapset', 'southamerica_mapset'):
+        if file_tag in ('australia_mapset', 'southamerica_mapset', 'globe'):
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         else:
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree(), regrid_shape=(2760, 5760))
@@ -366,8 +454,18 @@ def cache_plotall_precrain(region, file_tag, element=None):
         print(f'{file_tag} base image saved successfully')
     
 def cache_plotall_precsnow(region, file_tag, element=None):
+    """
+    Cache plotall_precsnow image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -415,7 +513,7 @@ def cache_plotall_precsnow(region, file_tag, element=None):
         if proj in ('ortho', 'laea'):
             ax.set_extent(region_info[region]['extent'], ccrs.PlateCarree())
         img = plt.imread(natural_earth)
-        if file_tag in ('australia_mapset', 'southamerica_mapset'):
+        if file_tag in ('australia_mapset', 'southamerica_mapset', 'globe'):
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         else:
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree(), regrid_shape=(2760, 5760))
@@ -425,8 +523,18 @@ def cache_plotall_precsnow(region, file_tag, element=None):
         print(f'{file_tag} base image saved successfully')
 
 def cache_plotall_slp(region, file_tag, element=None):
+    """
+    Cache plotall_slp image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -460,8 +568,18 @@ def cache_plotall_slp(region, file_tag, element=None):
         print(f'{file_tag} features saved successfully')
 
 def cache_plotall_t2m(region, file_tag, element=None):
+    """
+    Cache plotall_t2m image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -506,8 +624,18 @@ def cache_plotall_t2m(region, file_tag, element=None):
         print(f'{file_tag} features saved successfully')
 
 def cache_plotall_tpw(region, file_tag, element=None):
+    """
+    Cache plotall_tpw image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -552,8 +680,18 @@ def cache_plotall_tpw(region, file_tag, element=None):
         print(f'{file_tag} features saved successfully')
 
 def cache_plotall_cape(region, file_tag, element=None):
+    """
+    Cache plotall_cape image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -601,7 +739,7 @@ def cache_plotall_cape(region, file_tag, element=None):
         if proj in ('ortho', 'laea'):
             ax.set_extent(region_info[region]['extent'], ccrs.PlateCarree())
         img = plt.imread(natural_earth)
-        if file_tag in ('australia_mapset', 'southamerica_mapset'):
+        if file_tag in ('australia_mapset', 'southamerica_mapset', 'globe'):
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         else:
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree(), regrid_shape=(2760, 5760))
@@ -610,8 +748,18 @@ def cache_plotall_cape(region, file_tag, element=None):
         print(f'{file_tag} base image saved successfully')
 
 def cache_plotall_vort500mb(region, file_tag, element=None):
+    """
+    Cache plotall_vort500mb image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -649,7 +797,7 @@ def cache_plotall_vort500mb(region, file_tag, element=None):
         fig = plt.figure(dpi=1500)
         ax = plt.axes(projection=target_proj)
         img = plt.imread(natural_earth)
-        if file_tag in ('australia_mapset', 'southamerica_mapset'):
+        if file_tag in ('australia_mapset', 'southamerica_mapset', 'globe'):
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         else:
             ax.imshow(img, extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree(), regrid_shape=(2760, 5760))
@@ -661,8 +809,18 @@ def cache_plotall_vort500mb(region, file_tag, element=None):
         print(f'{file_tag} base image saved successfully')
 
 def cache_plotall_winds10m(region, file_tag, element=None):
+    """
+    Cache plotall_winds10m image features for a specified region.
+
+    Parameters:
+    - region (str): Region identifier.
+    - file_tag (str): File tag.
+    - element (str, optional): Element to cache. Defaults to None.
+    """
     proj = region_info[region]['proj']
     center = region_info[region]['center']
+    if proj == 'sub':
+        target_proj = ccrs.PlateCarree()
     if proj == 'ortho':
         target_proj = ccrs.Orthographic(center[0], center[1])
     if proj == 'laea':
@@ -706,6 +864,7 @@ def cache_plotall_winds10m(region, file_tag, element=None):
         plt.close()
         print(f'{file_tag} features saved successfully')
 
+# Dictionary to map caching functions to plot type
 cache_dict = {
     'plotall_ir8': cache_plotall_ir8,
     'plotall_wxtype': cache_plotall_wxtype,
@@ -721,6 +880,7 @@ cache_dict = {
     'plotall_winds10m': cache_plotall_winds10m
 }
 
+# Start timer
 t0 = time.time()
 
 for plot_type in plot_types:
@@ -731,5 +891,6 @@ for plot_type in plot_types:
 
 print('caching complete')
 
+# Evalute total run time
 runtime = time.time() - t0
 print(f'took {runtime // 3600} hours {runtime % 3600 // 60} minutes {runtime % 3600 % 60} seconds')

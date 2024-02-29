@@ -5,13 +5,22 @@ from scipy.io import FortranFile
 from sunpy.image import resample
 from numba import jit, float32, float64, int64, int32
 
-def congrid(data, shape, center=True, method='linear'):
+def congrid(data: np.ndarray, shape: tuple, center=True, method='linear') -> np.ndarray:
+    """
+    Resamples data to a specified shape.
+
+    Parameters:
+    - data (np.ndarray): Input data to be resampled.
+    - shape (tuple): Desired shape of the output data.
+    - center (bool, optional): If True, the coordinates are corrected to represent the center of the bins. Defaults to True.
+    - method (str, optional): Method of interpolation. Defaults to 'linear'. Supports
+    """
     return resample.resample(data, shape, center=center, method=method)
 
-def regrid(data, method='conservative', gridspec=None, undef=1e15):
+def regrid(data: np.ndarray, method='conservative', gridspec=None, undef=1e15) -> np.ndarray:
     """
-    method: str (default: 'conservative')
-        Supported values are 'conservative' and 'bilinear'.
+    Parameters:
+    - method (str): Method of regridding. Supported values are 'conservative' and 'bilinear'. Defaults to 'conservative'.
     """
     if method == 'conservative':
         ny, nx = data.shape[1:] if len(data.shape) == 3 else data.shape
@@ -27,6 +36,26 @@ def regrid(data, method='conservative', gridspec=None, undef=1e15):
 
 @jit(float64[:, :, :](float64[:, :, :], float64[:, :], float64[:, :], int64, float64, float32[:], float32[:], float32[:], float32[:], float32[:], float32[:], float64[:, :]), nopython=True)
 def conservative_regrid(shell, cube_data, cube_data_0, nt, undef, i_out, i_in, j_out, j_in, w_out, w_in, ff):
+    """
+    Conservative regrid algorithm to interpolate data onto another grid.
+
+    Parameters:
+    - shell (np.ndarray): Shell to store intermediate and final results.
+    - cube_data (np.ndarray): Input data to be interpolated.
+    - cube_data_0 (np.ndarray): Interpolated data.
+    - nt (int): Total number of iterations.
+    - undef (float): Value representing undefined or missing data.
+    - i_out (np.ndarray): Indices for output grid in x-direction.
+    - i_in (np.ndarray): Indices for input grid in x-direction.
+    - j_out (np.ndarray): Indices for output grid in y-direction.
+    - j_in (np.ndarray): Indices for input grid in y-direction.
+    - w_out (np.ndarray): Weighting factors for output grid.
+    - w_in (np.ndarray): Weighting factors for input grid.
+    - ff (np.ndarray): Fraction of total accumulation.
+
+    Returns:
+    - np.ndarray: Shell containing the final interpolated data and accumulation fractions.
+    """
     for n in range(nt):
         i_out_sample = np.int32(i_out[n] - 1)
         j_out_sample = np.int32(j_out[n] - 1)
@@ -47,7 +76,17 @@ def conservative_regrid(shell, cube_data, cube_data_0, nt, undef, i_out, i_in, j
     shell[1, :, :] = ff
     return shell
 
-def read_nt(tile_file: str, include_n_grids=False):
+def read_nt(tile_file: str, include_n_grids=False) -> int:
+    """
+    Reads the number of timesteps from a tile file.
+
+    Parameters:
+    - tile_file (str): Path to the tile file.
+    - include_n_grids (bool, optional): If True, also includes the number of grids. Defaults to False.
+
+    Returns:
+    - int or tuple: Number of timesteps or a tuple containing the number of timesteps and the number of grids, if include_n_grids is True.
+    """
     print(tile_file)
     subprocess.run(['ls', '-l', tile_file])
     with FortranFile(tile_file, 'r') as f:
@@ -57,7 +96,16 @@ def read_nt(tile_file: str, include_n_grids=False):
             return nt, n_grids
     return nt
 
-def read_tile_file(tile_file: str):
+def read_tile_file(tile_file: str) -> float:
+    """
+    Reads data from a tile file.
+
+    Parameters:
+    - tile_file (str): Path to the tile file.
+
+    Returns:
+    - tuple: Tuple containing data read from the tile file.
+    """
     with FortranFile(tile_file, 'r') as f:
         nt = f.read_ints('i4')
         n_grids = f.read_ints('i4')

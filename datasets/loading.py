@@ -1,18 +1,40 @@
 import os
 import sys
+import netCDF4
 import numpy as np
-
 from netCDF4 import Dataset
 
 class Cube(object):
-    def __init__(self, data, is1d, is2d, is3d, settings):
+    """
+    Represents a cubed sphere dataset.
+
+    Attributes:
+    - data (np.ndarray): The cube data.
+    - is1d (bool): True if the cube is 1-dimensional, False otherwise.
+    - is2d (bool): True if the cube is 2-dimensional, False otherwise.
+    - is3d (bool): True if the cube is 3-dimensional, False otherwise.
+    - settings (dict): Settings for loading the cube.
+    """
+    def __init__(self, data: np.ndarray, is1d: int, is2d: int, is3d: int, settings: dict):
         self.data = data
         self.is1d = is1d
         self.is2d = is2d
         self.is3d = is3d
         self.settings = settings
 
-def load_cube(infile: str, search_variable: str, undef, **kwargs):
+def load_cube(infile: str, search_variable: str, undef: float, **kwargs) -> Cube:
+    """
+    Loads cube data from a NetCDF file.
+
+    Parameters:
+    - infile (str): Path to the NetCDF file.
+    - search_variable (str): Variable to search in the NetCDF file.
+    - undef (float): Undefined value for cleaning cube data.
+    - **kwargs: Additional keyword arguments.
+
+    Returns:
+    - class Cube: An instance of the Cube class containing loaded data.
+    """
     print(infile)
     settings = extract_load_settings(kwargs)
 
@@ -161,13 +183,14 @@ def load_lcc(infile, search_variable):
 
 def extract_load_settings(params: dict, param_type='cube') -> dict:
     """
-    Extracts defined optional parameters and defines default values for undefined optional parameters.
-    Supports load_cube and load_goes.
+    Extracts and defines default optional parameters for loading cube or GOES data.
 
-    param: params - the optional parameters passed to load_cube or load_goes (arbitrary types and length)
-    param: param_type - 'cube' (default) or 'goes'
+    Parameters:
+    - params (dict): Optional parameters passed to load_cube or load_goes.
+    - param_type (str, optional): Type of parameters ('cube' or 'goes'). Defaults to 'cube'.
 
-    Returns a dictonary with all optional parameters defined.
+    Returns:
+    - dict: A dictionary with all optional parameters defined.
     """
     if param_type not in ['cube', 'goes']:
         raise Exception('ValueError: Invalid param_type. Only \'cube\' and \'goes\' params are supported.')
@@ -210,10 +233,18 @@ def extract_load_settings(params: dict, param_type='cube') -> dict:
 
     return params
 
-def clean_data(data: np.ndarray, undef=None, fill='nan', data_type='cube'):
+def clean_data(data: np.ndarray, undef=None, fill='nan', data_type='cube') -> np.ndarray:
     """
-    param: fill - np.nan (default) or 'zero' (0.0)
-    param: data_type - 'cube' (default) or 'goes'
+    Cleans cube or GOES data by replacing undefined values with np.nan or zero.
+
+    Parameters:
+    - data (np.ndarray): Data to be cleaned.
+    - undef (float): Undefined value for cleaning cube or GOES data.
+    - fill (str): Fill value ('nan' or 'zero').
+    - data_type (str): Type of data ('cube' or 'goes').
+
+    Returns:
+    - np.ndarray: Cleaned data.
     """
     if data_type not in ['cube', 'goes']:
         raise Exception('TypeError: Invalid data_type parameter. Only \'cube\' and \'goes\' are supported.')
@@ -229,7 +260,22 @@ def clean_data(data: np.ndarray, undef=None, fill='nan', data_type='cube'):
             mask = data == undef
             return np.ma.masked_where(mask, data)
         
-def curate_levels(nc_variables, search_variable, levels, level, nx, ny, time=None):
+def curate_levels(nc_variables, search_variable, levels, level: int, nx: int, ny: int, time=None) -> np.ndarray:
+    """
+    Curates levels for cube data based on the specified level.
+
+    Parameters:
+    - nc_variables: NetCDF variables.
+    - search_variable (str): Variable to search in the NetCDF file.
+    - levels: Levels in the NetCDF file.
+    - level (int): Specified level.
+    - nx (int): Size of x-dimension.
+    - ny (int): Size of y-dimension.
+    - time: Specified time.
+
+    Returns:
+    - np.ndarray: Curated cube data.
+    """
     if level:
         print(f'Reading LEVEL: {level}')
         if time:
@@ -248,7 +294,20 @@ def curate_levels(nc_variables, search_variable, levels, level, nx, ny, time=Non
         cube_data = nc_variables[search_variable][0].data
     return cube_data
 
-def get_xy_dimension_sizes(dims, nx, ny, nf, nt) -> tuple:
+def get_xy_dimension_sizes(dims: list, nx: int, ny: int, nf: int, nt:int) -> tuple:
+    """
+    Retrieves x and y dimension sizes from NetCDF dimensions.
+
+    Parameters:
+    - dims (list): NetCDF dimensions.
+    - nx (int): Size of x-dimension.
+    - ny (int): Size of y-dimension.
+    - nf (int): Size of nf-dimension.
+    - nt (int): Size of time-dimension.
+
+    Returns:
+    - tuple: Sizes of x and y dimensions.
+    """
     print(len(dims))
     print('----------')
     for dim in dims:
@@ -262,8 +321,28 @@ def get_xy_dimension_sizes(dims, nx, ny, nf, nt) -> tuple:
     print(len(dims))
     return nx, ny, nf, nt
 
-def get_nc_variable_data(dataset, search_variable: str) -> np.ndarray:
+def get_nc_variable_data(dataset: netCDF4.Dataset, search_variable: str) -> np.ndarray:
+    """
+    Retrieves data for a specific variable from a NetCDF dataset.
+
+    Parameters:
+    - dataset (netCDF4.Dataset): NetCDF dataset.
+    - search_variable (str): Variable to search in the NetCDF file.
+
+    Returns:
+    - np.ndarray: Data array for the specified variable.
+    """
+
     return dataset.variables[search_variable][0].data
 
 def get_unlimited_dimensions(dataset) -> list:
+    """
+    Retrieves unlimited dimensions from a NetCDF dataset.
+
+    Parameters:
+    - dataset (netCDF4.Dataset): NetCDF dataset.
+
+    Returns:
+    - list: List of unlimited dimensions.
+    """
     return [dataset.dimensions[dim] for dim in dataset.dimensions if dataset.dimensions[dim].isunlimited()]

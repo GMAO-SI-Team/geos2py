@@ -1,10 +1,18 @@
 import os
-
 from PIL import Image, ImageDraw, ImageFont
 
 def annotate(path: str, plot_type: str, mode='light', **kwargs):
     """
-    mode (optional, str) - 'light' or 'dark' 
+    Annotates map images with colorbars, logos, and additional information.
+
+    Parameters:
+    - path (str): Path to the base map image.
+    - plot_type (str): Type of plot for which annotation is being done.
+    - mode (str, optional): Color mode of the annotation (either 'light' or 'dark'). Defaults to 'light'.
+    - **kwargs: Additional keyword arguments including forecast information and date.
+
+    Returns:
+    - None
     """
     themes = {
         'light': 'black',
@@ -39,7 +47,10 @@ def annotate(path: str, plot_type: str, mode='light', **kwargs):
         mapset = mapset.resize((5600, 2760))
         dst.paste(mapset, (map_corner, 180))
 
-    dst.paste(colorbar, (1320, 2940), mask=colorbar)
+    if plot_type == 'plotall_aerosols':
+        dst.paste(colorbar, (820, 2960), mask=colorbar)
+    else:
+        dst.paste(colorbar, (1320, 2940), mask=colorbar)
     dst.paste(nasa_logo, (0, 0), mask=nasa_logo)
     dst.paste(gmao_logo, (dst.width - gmao_logo.width, 0))
 

@@ -22,6 +22,19 @@ If you are working locally, the dependencies are:
 - pandas==2.0.3
 - contourpy=1.1.0
 
+## Discover
+
+Code
+`/discover/nobackup/qcambrel/geospy`
+
+Images
+`/discover/nobackup/projects/gmao/g6dev/pub/qcambrel/`
+
+## See the images
+
+Check out the datashare
+[NCCS Hosted Images](https://portal.nccs.nasa.gov/datashare/g6dev/qcambrel/)
+
 ## Performance
 
 #### plotall_ir8
@@ -67,7 +80,11 @@ If you are working locally, the dependencies are:
 - average time 'nsper': 0.0 hours 0.0 minutes 49.24169617891312 seconds
 
 #### plotall_slp
-- pending
+- average time 'sub': 0.0 hours 0.0 minutes 9.654320478439331 seconds
+- average time 'ortho': 0.0 hours 0.0 minutes 11.35473096370697 seconds
+- average time 'laea': 0.0 hours 0.0 minutes 12.980954432487488 seconds
+- average time 'geos': 0.0 hours 0.0 minutes 14.44656057357788 seconds
+- average time 'nsper': 0.0 hours 0.0 minutes 16.031678676605225 seconds
 
 #### plotall_t2m
 - average time 'sub': 0.0 hours 0.0 minutes 9.49286139011383 seconds
@@ -133,6 +150,26 @@ Generally, I recommended just copying the zip file of all the cached elements.
 ```sh
 cp /discover/nobackup/qcambrel/geospy/cache.zip destination_directory
 ```
+**cache updated 2/29/24**
+
+## Base Images
+The original base images can be found at:
+
+color
+`/discover/nobackup/projects/gmao/g6dev/pub/BMNG/New/eo_base_2020_clean_geo.3x21600x10800.jpg`
+
+grayscale
+`/discover/nobackup/projects/gmao/g6dev/pub/BMNG/natural_earth_grey_16200x8100.jpeg`
+
+## Shapefiles
+The code uses shapefiles located at:
+`/discover/nobackup/qcambrel/gmaopy/SHAPE_FILES`
+
+The original shapefiles are located at:
+`/home/wputman/IDL_ESSENTIALS/SHAPE_FILES`
+
+## Driver Script
+Driver Shell script now has the LANG parameter. User must enter **idl** or **python**. This needs to tested by a user with sufficient permissions. 
 
 ## Modules
 - plotting
@@ -271,5 +308,15 @@ python plotall_slp.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/no
 #### plotall_aerosols
 test arguments
 ```sh
-python plotall_aerosols.py 2023 10 11 12 00 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_00z' && python plotall_aerosols.py 2023 10 11 12 00 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_00z'
+python plotall_aerosols.py 2023 10 11 12 00 G5GMAO f5295_fp-20231011_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20231011_12z' && python plotall_aerosols.py 2023 10 11 12 00 G5GMAO f5295_fp-20231011_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20231011_12z'
 ```
+
+## Important Notes
+- All plots are functional and have *"the right look"*
+- There is an issue with find_slp_mins in plotall_slp that results in "finding" way too many locations
+- Code still needs to be added to handle tracking of forecast hours
+- Paths module is started but needs to be finished
+- Data accumulation for plotall_precsnow and plotall_precrain is handled by pickling the array
+- Refer to /home/wputman/IDL_ESSENTIALS/setup_region.pro if new region information is required
+- Updating regions.json is highly recommended
+- Logging is still untested

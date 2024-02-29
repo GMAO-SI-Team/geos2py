@@ -12,8 +12,10 @@ from processing.smoothing import savitzky_golay2d
 from datasets import loading
 from epilogue.annotation import annotate
 
+# Start timer
 t0 = time.time()
 
+# Parse command line arguments to specify data source
 parser = argparse.ArgumentParser(description='Process date specified data')
 parser.add_argument('year')
 parser.add_argument('month')
@@ -43,14 +45,17 @@ data_dir = args.data_dir
 
 data_dir = f'{data_dir}/GEOS.fp.asm.tavg1_2d_slv_Nx.{f_date[:-1]}30.V01.nc4'
 
+# Define the vorticity colormap and normalization
 vorticity_cmap = Colormap('plotall_vort500mb', 'vort')
 cmap = vorticity_cmap.cmap
 norm = vorticity_cmap.norm
 
+# Read and extract the data
 heights = loading.load_cube(data_dir, 'H500', 1e15, no_map_set=True).data
 u = loading.load_cube(data_dir, 'U500', 1e15, no_map_set=True).data
 v = loading.load_cube(data_dir, 'V500', 1e15, no_map_set=True).data
 
+# Compute forces and derivatives
 rad = np.pi / 180.0
 re = 6371220.0
 rr = re * rad
@@ -82,36 +87,34 @@ for j in range(720):
     if lats[j] <= 0:
         data[j, :] = -1 * data[j, :]
 
+# Resample data to 5760x2760 shape
 heights = congrid(heights, (2760, 5760), center=True)
 data = congrid(data, (2760, 5760), center=True)
 
+# Smooth heights
 heights = savitzky_golay2d(heights, int(5760 * 0.025) + 1, 2)
 
 print('data', data.min(), data.max())
 print('heights', heights.min(), heights.max())
 
-# print(snow.min(), rain.min(), ice.min(), frzr.min())
-# print(snow.max(), rain.max(), ice.max(), frzr.max())
-
-# rain = np.ma.masked_where(rain < 0.01, rain)
-
-# data = [np.ma.masked_where(wxtype < 0.01, wxtype) for wxtype in (snow, ice, frzr, rain, t2m, slp)]
-# levels = [levels, slp_levels, t2m_levels]
-
+# Mask data values < 2.5 (lower bound) and > 60 (upper bound)
 mask = np.logical_or(data < 2.5, data > 60)
 data = np.ma.masked_array(data, mask)
 print('data', data.min(), data.max())
 
 data = [data, heights]
 
+# Open regions JSON
 with open('regions.json', 'r') as infile:
     region_info = json.load(infile)
 
+# Set region(s)
 regions = region_info[region] if region in ('0', '-1') else [region]
 
 times = {}
 
 for region in regions:
+    # Define plot parameters for specified region
     region = str(region)
     file_tag = region_info[region]['file_tag']
     lon_cen, lat_cen = region_info[region]['center']
@@ -128,10 +131,14 @@ for region in regions:
     for proj in projs:
         times[proj] = [] if proj not in times else times[proj]
 
+    # Start regional timer
     dt0 = time.time()
+
+    # Initialize vorticity plotter and plot data
     vorticity_plotter = Plotter('plotall_vort500mb', region, file_tag, target_proj, proj_name)
     vorticity_plotter.render(data, cmap, norm)
     
+    # Set image annotation text
     forecast_hours = f'000 Forecast Hours'
     forecast_hours = f'{forecast_hours}\n INIT: 20230529_12z'
     forecast_p_tag = 'GEOS ' + 'f5295_fp'
@@ -144,12 +151,16 @@ for region in regions:
     satellite = ['geos', 'nsper']
     mode = 'dark' if proj_name in satellite else 'light'
 
+    # Annotate final image
     annotate(f'tmp/{proj_name}-vort500mb-{file_tag}.png', 'plotall_vort500mb', mode=mode, forecast=forecast_str, date=date_index)
     print(f'{file_tag} saved successfully')
+
+    # Record region time
     times[proj_name].append(time.time() - dt0)
 
 t = time.time() - t0
 
+# Evalute total compute time and average plotting time by projection type
 print(f'total run time: {t // 3600} hours {t % 3600 // 60} minutes {t % 3600 % 60} seconds')
 for proj in times:
     if times[proj]:

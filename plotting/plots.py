@@ -1,6 +1,5 @@
 import os
 import json
-import warnings
 import numpy as np
 import PIL.Image as image
 import cartopy.crs as ccrs
@@ -10,7 +9,19 @@ class Plotter(object):
     """
     Plotter instance to render GEOS forecasts
     """
-    def __init__(self, plot_type, region, file_tag, target_proj, proj_name, label_coords=None, interpolator=None):
+    def __init__(self, plot_type: str, region: str, file_tag: str, target_proj: ccrs.Projection, proj_name: str, label_coords=None, interpolator=None):
+        """
+        Initialize Plotter object.
+
+        Parameters:
+        - plot_type (str): Type of plot.
+        - region (str): Region for the plot.
+        - file_tag (str): Tag for the file.
+        - target_proj (cartopy.crs.Projection): Target projection.
+        - proj_name (str): Name of the projection.
+        - label_coords (list of tuples, optional): Coordinates for labels. Defaults to None.
+        - interpolator (callable, optional): Interpolator function. Defaults to None.
+        """
         self.plot_type = plot_type
         self.region = region
         self.file_tag = file_tag
@@ -30,6 +41,9 @@ class Plotter(object):
         self._set_plotters()
 
     def _set_paths(self):
+        """
+        Set paths for different elements of the plot.
+        """
         plot_abbr = {
             'plotall_ir8': 'ir',
             'plotall_wxtype': 'weather',
@@ -60,6 +74,9 @@ class Plotter(object):
         self.natural_earth_path = f'cache/natural_earth_{grayscale[self.plot_type]}_{self.file_tag}.png' if self.plot_type in grayscale else None
 
     def _set_plotters(self):
+        """
+        Set plotter functions based on plot type.
+        """
         self.plotters = {
             'plotall_ir8': self._plot_infrared,
             'plotall_wxtype': self._plot_weather,
@@ -76,6 +93,15 @@ class Plotter(object):
         }
 
     def render(self, data, cmap, norm, save=True):
+        """
+        Render the plot.
+
+        Parameters:
+        - data (np.ndarray or list of nd.arrays): Data for the plot.
+        - cmap (mpl.colors.ListedColormap): Colormap for the plot.
+        - norm (mpl.colors.Normalize): Normalization for the plot.
+        - save (bool, optional): Whether to save the plot. Defaults to True.
+        """
         self.data = data
         self.cmap = cmap
         self.norm = norm
@@ -104,10 +130,16 @@ class Plotter(object):
             img.save(self.completed_path)
 
     def _plot_infrared(self):
+        """
+        Plot clean longwave infrared data.
+        """
         # self.ax.pcolormesh(self.lons, self.lats, self.data, transform=ccrs.PlateCarree(), cmap=self.cmap, norm=self.norm)
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
 
     def _plot_weather(self):
+        """
+        Plot weather data. Includes snow, ice, freezing rain, rain, 2-meter temperature, and sea level pressure.
+        """
         snow, ice, frzr, rain, t2m, slp = self.data
         snow_cmap, ice_cmap, frzr_cmap, rain_cmap = self.cmap
         snow_norm, ice_norm, frzr_norm, rain_norm = self.norm
@@ -117,23 +149,7 @@ class Plotter(object):
         levs3 = 1000 + np.arange(31) * 2
         slp_levels = np.append(np.append(levs1, levs2), levs3)
         t2m_levels = [273.15]
-        # if self.proj_name == 'laea':
-        #     transform = self.target_proj.transform_points(ccrs.PlateCarree(), self.lons, self.lats, rain)
-        #     # transform[np.where(np.isnan(transform))] = 0
-        #     # print(self.target_proj)
-        #     transform = np.ma.masked_where(np.isnan(transform), transform)
-        #     lons = transform[:, :, 0]
-        #     lats = transform[:, :, 1]
-        #     # rain = transform[:, :, 2]
-        #     self.ax.contourf(lons, lats, snow, transform=self.target_proj, levels=prec_levels, cmap=snow_cmap, norm=snow_norm)
-        #     self.ax.contourf(lons, lats, rain, transform=self.target_proj, levels=prec_levels, cmap=rain_cmap, norm=rain_norm)
-        #     self.ax.contourf(lons, lats, frzr, transform=self.target_proj, levels=prec_levels, cmap=frzr_cmap, norm=frzr_norm)
-        #     self.ax.contourf(lons, lats, ice, transform=self.target_proj, levels=prec_levels, cmap=ice_cmap, norm=ice_norm)
-        #     slpc = self.ax.contour(lons, lats, slp, transform=self.target_proj, colors='black', alpha=0.7, levels=slp_levels, linewidths=0.125)
-        #     t2mc = self.ax.contour(lons, lats, t2m, transform=self.target_proj, colors='black', alpha=0.7, levels=t2m_levels, linewidths=0.125)
-        #     self.ax.clabel(slpc, inline=True, fontsize=4)
-        #     self.ax.clabel(t2mc, inline=True, fontsize=4)
-        # else:
+
         snow_mask = snow < 0.01
         ice_mask = ice < 0.01
         frzr_mask = frzr < 0.01
@@ -150,16 +166,15 @@ class Plotter(object):
         self.ax.contourf(rain_lons, rain_lats, rain, transform=ccrs.PlateCarree(), levels=prec_levels, cmap=rain_cmap, norm=rain_norm)
         self.ax.contourf(frzr_lons, frzr_lats, frzr, transform=ccrs.PlateCarree(), levels=prec_levels, cmap=frzr_cmap, norm=frzr_norm)
         self.ax.contourf(ice_lons, ice_lats, ice, transform=ccrs.PlateCarree(), levels=prec_levels, cmap=ice_cmap, norm=ice_norm)
-        # self.ax.pcolormesh(self.lons, self.lats, snow, transform=ccrs.PlateCarree(), cmap=snow_cmap, norm=snow_norm)
-        # self.ax.pcolormesh(self.lons, self.lats, rain, transform=ccrs.PlateCarree(), cmap=rain_cmap, norm=rain_norm)
-        # self.ax.pcolormesh(self.lons, self.lats, frzr, transform=ccrs.PlateCarree(), cmap=frzr_cmap, norm=frzr_norm)
-        # self.ax.pcolormesh(self.lons, self.lats, ice, transform=ccrs.PlateCarree(), cmap=ice_cmap, norm=ice_norm)
         slpc = self.ax.contour(self.lons, self.lats, slp, transform=ccrs.PlateCarree(), colors='black', alpha=0.7, levels=slp_levels, linewidths=0.125)
         t2mc = self.ax.contour(self.lons, self.lats, t2m, transform=ccrs.PlateCarree(), colors='black', alpha=0.7, levels=t2m_levels, linewidths=0.125)
         self.ax.clabel(slpc, inline=True, fontsize=4)
         self.ax.clabel(t2mc, inline=True, fontsize=4)
 
     def _plot_aerosols(self):
+        """
+        Plot aerosols data. Includes seasalt, dust, organic carbon, black carbon, sulfate and nitrate.
+        """
         ss, du, oc, bc, su, ni = self.data
         self.ax.imshow(ss, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
         self.ax.imshow(du, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
@@ -169,9 +184,15 @@ class Plotter(object):
         self.ax.imshow(bc, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
 
     def _plot_radar(self):
+        """
+        Plot simulated radar sensitivity data.
+        """
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
 
     def _plot_rain(self):
+        """
+        Plot accumulated rain data.
+        """
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         for label_coord in self.label_coords:
             y_coord, x_coord = label_coord
@@ -186,6 +207,9 @@ class Plotter(object):
                     self.ax.text(x_coord, y_coord, f'{np.round(interpolated_value).astype(int)}', color='white', fontsize=1, transform=ccrs.PlateCarree())
 
     def _plot_snow(self):
+        """
+        Plot accumulated snow data.
+        """
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         for label_coord in self.label_coords:
             y_coord, x_coord = label_coord
@@ -200,14 +224,20 @@ class Plotter(object):
                     self.ax.text(x_coord, y_coord, f'{np.round(interpolated_value).astype(int)}', color='white', fontsize=1, transform=ccrs.PlateCarree())
 
     def _plot_water(self):
+        """
+        Plot total precipitable water data.
+        """
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
 
     def _plot_pressure(self):
+        """
+        Plot sea level pressure data. Labels pressure minima.
+        """
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
-        slp_min_locs, data_lons = self.label_coords
+        slp_min_locs, x_window = self.label_coords
         for slp_min_loc in slp_min_locs:
             x_coord, y_coord, pressure = slp_min_loc
-            label_size = max(3, 2.5 / (360 * 111.11111 / (360 / data_lons)))
+            label_size = max(3, 2.5 / (360 * 111.11111 / (360 / x_window)))
             if self.limit_extent:
                 x_0, x_1, y_0, y_1 = self.extent
                 if x_0 <= x_coord <= x_1 and y_0 <= y_coord <= y_1:
@@ -219,6 +249,9 @@ class Plotter(object):
                     self.ax.text(x_coord, y_coord, f'{np.round(pressure).astype(int)}', color='black', clip_on=True, fontsize=label_size, transform=ccrs.PlateCarree())
 
     def _plot_temp(self):
+        """
+        Plot 2-meter temperature data. Labels temp by city.
+        """
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         for label_coord in self.label_coords:
             y_coord, x_coord = label_coord
@@ -246,9 +279,15 @@ class Plotter(object):
                     self.ax.text(x_coord, y_coord, f'{np.round(interpolated_value).astype(int)}', color=label_color, fontsize=label_size, transform=ccrs.PlateCarree())
 
     def _plot_energy(self):
+        """
+        Plot surface convective available potential energy (CAPE) data.
+        """
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())                
     
     def _plot_wind(self):
+        """
+        Plot 10-meter winds data. Labels wind vectors by city.
+        """
         self.ax.imshow(self.data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
         for label_coord in self.label_coords:
             y_coord, x_coord = label_coord
@@ -265,6 +304,9 @@ class Plotter(object):
                         self.ax.text(x_coord, y_coord, f'{np.round(interpolated_value).astype(int)}', color='black', fontsize=3, transform=ccrs.PlateCarree())
 
     def _plot_vorticity(self):
+        """
+        Plot 500 meter vorticity data. Includes vorticity and heights.
+        """
         data, heights = self.data
         levels = np.arange(60) * 30 + 4500
         self.ax.imshow(data, cmap=self.cmap, norm=self.norm, origin='lower', interpolation='nearest', extent=(-180, 180, -90, 90), transform=ccrs.PlateCarree())
