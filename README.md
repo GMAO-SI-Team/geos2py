@@ -1,6 +1,6 @@
 # Experimental GEOS Forecasts with Python
 
-GMAOpy has effectively served its purpose as a proof of concept and is now depreciated. All further development will be focused on GEOSpy. All data processing and visualization functionality has been refactored and adapted into a more modular architecture. Utilities for logging, file management, asset management, and various other supplemental tasks have been provided. Relevant regional and global attributes have been serialized with JSON and YAML for improved readability and workflow. Coastlines, borders, and other shapefile data are now reprojected and cached for faster plotting. Base images have similarly been reprojected and cached for faster plotting. Modules for reproducing these images from scratch have been provided as utilities. Bear in mind that the aforementioned process is time consuming. Data processing procedures are highly optimized. Conservative regridding takes approximately a second or less. Serialization and deserialization is very fast. Loading of base images requires only seconds. Plotting is even further optimized with some average times dipping down to around 10 seconds. Bugs limiting accuracy have also been significantly reduced. The only inaccuracies to resolves are in plotall_precsnow. As for the remaining plots, plotall_slp will be complete as soon as the issue regarding locating sea level pressure minima is resolved and plotall_aerosols will be complete as soon as the blending issue is resolved. Otherwise, the plotting is virtual complete with just some stretch goals remaining. Additionally, the prologue component needs to be updated to begin handling differing dates and directories as well as the logging, which shouldn't be too arduous.  
+GMAOpy has effectively served its purpose as a proof of concept and is now depreciated. All further development will be focused on GEOSpy. All data processing and visualization functionality has been refactored and adapted into a more modular architecture. Utilities for logging, file management, asset management, and various other supplemental tasks have been provided. Relevant regional and global attributes have been serialized with JSON and YAML for improved readability and workflow. Coastlines, borders, and other shapefile data are now reprojected and cached for faster plotting. Base images have similarly been reprojected and cached for faster plotting. Modules for reproducing these images from scratch have been provided as utilities. Bear in mind that the aforementioned process is time consuming. Data processing procedures are highly optimized. Conservative regridding takes approximately a second or less. Serialization and deserialization is very fast. Loading of base images requires only seconds. Plotting is even further optimized with some average times dipping down to around 10 seconds. Graphical bugs are largely resolved. There just remains one computational bug concerning slp minima location in plotall_slp. All plots are functionally complete.  
 
 ## Environment Setup
 ```sh
@@ -187,9 +187,13 @@ Driver Shell script now has the LANG parameter. User must enter **idl** or **pyt
         - read_tile_file: returns tile file to prepare gridspec
     - smoothing
         - savitzky_golay2d: implements the Savitzky Golay 2D algorithm to smooth noisy contours
-        - ideal_bandpass_filter: implements an ideal bandpass filter to denoise data for minima search
+        - bandpass_filter: implements the IDL bandpass filter function with ideal, butterworth, and gaussian flags bandpass to denoise data for minima search
+    - scaling
+        - bytscl: implements IDL bytscl function to scale image based on high and low parameters
 - epilogue
     - annotate: composes the final plot image using Pillow
+- utils
+    - paths
 
 ## How to run the scripts
 ```sh
@@ -237,6 +241,8 @@ These are all serialized in regions.json.
 - region code 47: himawari_proj
 - region code 71: nh_proj
 - region code 72: sh_proj
+
+Use region code "globe" to plot the latlon globe projection 
 
 ### Using canned values
 
