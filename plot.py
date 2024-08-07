@@ -20,19 +20,23 @@ from epilogue.annotation import annotate
 t0 = time.time()
 
 # Parse command line arguments to specify data source and plot type
+
+# Argument structure:
+# python plot.py year month day hour minute file_location --region=region_code  plot_type
+
 parser = argparse.ArgumentParser(description='Process date specified data and plot type')
 parser.add_argument('year')
 parser.add_argument('month')
 parser.add_argument('day')
 parser.add_argument('hour')
 parser.add_argument('minute')
-parser.add_argument('tag')
-parser.add_argument('s_tag')
+#parser.add_argument('tag')
+#parser.add_argument('s_tag')
 parser.add_argument('data_dir')
-parser.add_argument('stream')
-parser.add_argument('plot_type', choices=['aerosols', 'cape', 'ir8', 'precrain'])
+#parser.add_argument('stream')
+parser.add_argument('plot_type', choices=['aerosols', 'cape', 'ir8', 'precrain', 'precsnow', 't2m', 'tpw', 'vort500mb', 'winds10m', 'radar', 'wxtype', 'slp'])
 parser.add_argument('--region')
-parser.add_argument('--f_date')
+#parser.add_argument('--f_date')
 args = parser.parse_args()
 
 year = args.year
@@ -42,10 +46,10 @@ hour = args.hour
 minute = args.minute
 
 region = args.region if args.region else '-1'
-tag = args.tag
-f_date = args.f_date if args.f_date else f'{year}{month}{day}_{hour}z'
-s_tag = args.s_tag if args.s_tag else f'f5295_fp-{f_date}'
-stream = args.stream
+#tag = args.tag
+f_date = f'{year}{month}{day}_{hour}z'
+s_tag =  f'f5295_fp-{f_date}'
+#stream = args.stream
 data_dir = args.data_dir
 plot_type = args.plot_type
 
@@ -59,9 +63,49 @@ times = {}
 
 
 
-def plot_aerosols():
+
+def plot_ir8():
+    
+    #data_dir_ir8 = f'{data_dir}/GEOS.fp.asm.tavg1_2d_flx_Nx.{f_date[:-1]}30.V01.nc4'
+    data_dir_ir8 = data_dir
+
+
+    # Define the infrared colormap and normalization
+    ir8_cmap = Colormap('plotall_ir8', 'TBISCCP')
+    cmap = ir8_cmap.cmap
+    norm = ir8_cmap.norm
+
+    # Read and extract the data
+    cube = loading.load_cube(data_dir_ir8, 'TBISCCP', 1e15, no_map_set=True)
+
+    
+    
+    if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
+        tile_file = '/discover/nobackup/ltakacs/bcs/Ganymed-4_0/Ganymed-4_0_Ostia/Shared/DC2880xPC1441_CF0720x6C.bin'
+    else:
+        tile_file = 'data/DC2880xPC1441_CF0720x6C.bin'
+    gridspec = read_tile_file(tile_file)
+    
+    # Convert Kelvin to Celsius
+    data = cube.data - 273.15
+
+    # First order conservative regridding using 4320x720 to 2880x1441 gridspec
+    data = regrid(data, method='conservative', gridspec=gridspec, undef=1e15)
+
+    # Resample data to 5760x2760 shape
+    data = loading.clean_data(data, undef=1e15)
+    data = congrid(data, (2760, 5760), center=True) 
+
+    plot_data(data, cmap, norm, 'plotall_ir8')
+
+
+
+
+def plot_aerosols():    
+
     # File path for aerosols data
-    data_dir_aerosols = f'{data_dir}/GEOS.fp.fcst.inst1_2d_hwl_Nx.{f_date[:-1]}+20231013_0000.V01.nc4'
+    #data_dir_aerosols = f'{data_dir}/GEOS.fp.fcst.inst1_2d_hwl_Nx.{f_date[:-1]}+20231013_0000.V01.nc4'
+    data_dir_aerosols = data_dir
     
     # Load aerosol data
     ss = loading.load_cube(data_dir_aerosols, 'SSEXTTAU', 1e15, no_map_set=True).data
@@ -90,11 +134,11 @@ def plot_aerosols():
     
     plot_data(data, cmaps, norms, 'plotall_aerosols')
 
-    
 
 def plot_cape():
     # File path for CAPE data
-    data_dir_cape = f'{data_dir}/GEOS.fp.fcst.inst3_2d_met_Nx.{f_date[:-1]}+20231224_0900.V01.nc4'
+    #data_dir_cape = f'{data_dir}/GEOS.fp.fcst.inst3_2d_met_Nx.{f_date[:-1]}+20231224_0900.V01.nc4'
+    data_dir_cape = data_dir
     
     # Define the CAPE colormap and normalization
     cape_cmap = Colormap('plotall_cape', 'CAPE')
@@ -116,43 +160,10 @@ def plot_cape():
     plot_data([data], [cmap], [norm], 'plotall_cape')
 
 
-def plot_ir8():
-    
-    #
-    data_dir_ir8 = f'{data_dir}/GEOS.fp.asm.tavg1_2d_flx_Nx.{f_date[:-1]}30.V01.nc4'
-
-    # Define the infrared colormap and normalization
-    ir8_cmap = Colormap('plotall_ir8', 'TBISCCP')
-    cmap = ir8_cmap.cmap
-    norm = ir8_cmap.norm
-
-    # Read and extract the data
-    cube = loading.load_cube(data_dir_ir8, 'TBISCCP', 1e15, no_map_set=True)
-
-
-    
-    if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
-        tile_file = '/discover/nobackup/ltakacs/bcs/Ganymed-4_0/Ganymed-4_0_Ostia/Shared/DC2880xPC1441_CF0720x6C.bin'
-    else:
-        tile_file = 'tiles/DC2880xPC1441_CF0720x6C.bin'
-    gridspec = read_tile_file(tile_file)
-
-    # Convert Kelvin to Celsius
-    data = cube.data - 273.15
-
-    # First order conservative regridding using 4320x720 to 2880x1441 gridspec
-    data = regrid(data, method='conservative', gridspec=gridspec, undef=1e15)
-
-    # Resample data to 5760x2760 shape
-    data = loading.clean_data(data, undef=1e15)
-    data = congrid(data, (2760, 5760), center=True) 
-
-    plot_data(data, cmap, norm, 'plotall_ir8')
-
-
 def plot_precrain():
     # File path for rain data
-    data_dir_precrain = f'{data_dir}/GEOS.fp.asm.tavg1_2d_flx_Nx.{f_date[:-1]}30.V01.nc4'
+    #data_dir_precrain = f'{data_dir}/GEOS.fp.asm.tavg1_2d_flx_Nx.{f_date[:-1]}30.V01.nc4'
+    data_dir_precrain = data_dir
     
     # Define zero array for summing accumulated data
     saved_data = f'tmp/raindata-{f_date}.pkl'
@@ -176,7 +187,8 @@ def plot_precrain():
 
 def plot_precsnow():
     # File path for snow data
-    data_dir_precsnow = f'{data_dir}/GEOS.fp.asm.tavg1_2d_flx_Nx.{f_date[:-1]}30.V01.nc4'
+    #data_dir_precsnow = f'{data_dir}/GEOS.fp.asm.tavg1_2d_flx_Nx.{f_date[:-1]}30.V01.nc4'
+    data_dir_precsnow = data_dir
 
     # Define zero array for summing accumulated data
     saved_data = f'tmp/snowdata-{f_date}.pkl'
@@ -207,7 +219,8 @@ def plot_precsnow():
 
 
 def plot_t2m():
-    data_dir_t2m = f'{data_dir}/GEOS.fp.asm.tavg1_2d_slv_Nx.{f_date[:-1]}30.V01.nc4'
+    #data_dir_t2m = f'{data_dir}/GEOS.fp.asm.tavg1_2d_slv_Nx.{f_date[:-1]}30.V01.nc4'
+    data_dir_t2m = data_dir
 
     # Define the temperature colormaps and normalization
     temp_cmap = Colormap('plotall_t2m', 'T2M')
@@ -224,7 +237,8 @@ def plot_t2m():
 
 
 def plot_tpw():
-    data_dir_tpw = f'{data_dir}/GEOS.fp.asm.tavg1_2d_slv_Nx.{f_date[:-1]}30.V01.nc4'
+    #data_dir_tpw = f'{data_dir}/GEOS.fp.asm.tavg1_2d_slv_Nx.{f_date[:-1]}30.V01.nc4'
+    data_dir_tpw = data_dir
 
     # Define the water colormap and normalization
     tpw_cmap = Colormap('plotall_tpw', 'TQV')
@@ -241,7 +255,8 @@ def plot_tpw():
 
 
 def plot_vort500mb():
-    data_dir_vort = f'{data_dir}/GEOS.fp.asm.tavg1_2d_slv_Nx.{f_date[:-1]}30.V01.nc4'
+    #data_dir_vort = f'{data_dir}/GEOS.fp.asm.tavg1_2d_slv_Nx.{f_date[:-1]}30.V01.nc4'
+    data_dir_vort = data_dir
 
     # Define the vorticity colormap and normalization
     vorticity_cmap = Colormap('plotall_vort500mb', 'vort')
@@ -303,7 +318,8 @@ def plot_vort500mb():
 
 
 def plot_winds10m():
-    data_dir_winds = f'{data_dir}/GEOS.fp.asm.tavg1_2d_flx_Nx.{f_date[:-1]}30.V01.nc4'
+    #data_dir_winds = f'{data_dir}/GEOS.fp.asm.tavg1_2d_flx_Nx.{f_date[:-1]}30.V01.nc4'
+    data_dir_winds = data_dir
 
     # Define the wind colormap and normalization
     wind_cmap = Colormap('plotall_winds10m', 'spd')
@@ -342,7 +358,8 @@ def plot_winds10m():
 
 
 def plot_radar():
-    data_dir_radar = f'{data_dir}/GEOS.fp.fcst.inst_30mn_met_c0720sfc.{f_date[:-1]}+{f_date[:-1]}{minute}.V01.nc4'
+    #data_dir_radar = f'{data_dir}/GEOS.fp.fcst.inst_30mn_met_c0720sfc.{f_date[:-1]}+{f_date[:-1]}{minute}.V01.nc4'
+    data_dir_radar = data_dir
 
     # Define the radar colormap and normalization
     radar_cmap = Colormap('plotall_radar', 'DBZ_MAX')
@@ -500,7 +517,7 @@ def plot_data(data, cmap, norm, plot_tag):
         mode = 'dark' if proj_name in satellite else 'light'
 
         # Annotate final image
-        annotate(f'tmp/{proj_name}-ir8-{file_tag}.png', 'plotall_ir8', mode=mode, forecast=forecast_str, date=date_index)
+        annotate(f'tmp/{proj_name}-ir8-{file_tag}.png', plot_tag, mode=mode, forecast=forecast_str, date=date_index)
         print(f'{file_tag} saved successfully')
 
         # Record region time
@@ -519,36 +536,23 @@ def plot_data(data, cmap, norm, plot_tag):
 
 
 
-
 # Main routine to call appropriate plotting function based on specified plot type
-match plot_type:
-    case 'aerosols':
-        plot_aerosols()
-    case 'cape':
-        plot_cape()
-    case 'ir8':
-        plot_ir8()
-    case 'precrain':
-        plot_precrain()
-    case 'precsnow':
-        plot_precsnow()
-    case 't2m':
-        plot_t2m()
-    case 'tpw':
-        plot_tpw()
-    case 'vort500mb':
-        plot_vort500mb()
-    case 'winds10m':
-        plot_winds10m()
-    case 'radar':
-        plot_radar()
-    case 'wxtype':
-        plot_wxtype()
-    case 'slp':
-        plot_slp()
-    case _:
-        print("Invalid plot type")
 
+case = {
+    'ir8': plot_ir8(),
+    'cape': plot_cape(),
+    'aerosols': plot_aerosols(),
+    'precrain': plot_precrain(),
+    'precsnow': plot_precsnow(),
+    't2m': plot_t2m(),
+    'tpw': plot_tpw(),
+    'vort500mb': plot_vort500mb(),
+    'winds10m': plot_winds10m(),
+    'wxtype': plot_wxtype(),
+    'slp': plot_slp()
+}
+
+case.get(plot_type)
 
 
 
