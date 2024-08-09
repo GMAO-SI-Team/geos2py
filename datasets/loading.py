@@ -346,3 +346,20 @@ def get_unlimited_dimensions(dataset) -> list:
     - list: List of unlimited dimensions.
     """
     return [dataset.dimensions[dim] for dim in dataset.dimensions if dataset.dimensions[dim].isunlimited()]
+
+
+def get_nc_timestamp(datadir: str) -> datetime: 
+    """
+    Retrieves timestamp from a NetCDF dataset.
+
+    Parameters:
+    - string (str): NetCDF filename.
+
+    Returns:
+    - datetime (datetime.datetime): datetime retrieved from NetCDF
+    """
+
+
+    dataset = Dataset(datadir)
+    time_var = dataset.variables['time']
+    return num2date(time_var[:],time_var.units)[0]
