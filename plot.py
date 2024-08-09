@@ -22,36 +22,31 @@ t0 = time.time()
 # Parse command line arguments to specify data source and plot type
 
 # Argument structure:
-# python plot.py year month day hour minute file_location --region=region_code  plot_type
+# python plot.py file_location --region=region_code plot_type
 
 parser = argparse.ArgumentParser(description='Process date specified data and plot type')
-parser.add_argument('year')
-parser.add_argument('month')
-parser.add_argument('day')
-parser.add_argument('hour')
-parser.add_argument('minute')
-#parser.add_argument('tag')
-#parser.add_argument('s_tag')
 parser.add_argument('data_dir')
-#parser.add_argument('stream')
 parser.add_argument('plot_type', choices=['aerosols', 'cape', 'ir8', 'precrain', 'precsnow', 't2m', 'tpw', 'vort500mb', 'winds10m', 'radar', 'wxtype', 'slp'])
 parser.add_argument('--region')
-#parser.add_argument('--f_date')
 args = parser.parse_args()
 
-year = args.year
-month = args.month
-day = args.day
-hour = args.hour
-minute = args.minute
+
+data_dir = args.data_dir
+plot_type = args.plot_type
+
+timestamp = loading.get_nc_timestamp(data_dir)
+
+year = timestamp.year
+month = timestamp.month
+day = timestamp.day
+hour = timestamp.hour
+minute = timestamp.minute
 
 region = args.region if args.region else '-1'
 #tag = args.tag
 f_date = f'{year}{month}{day}_{hour}z'
 s_tag =  f'f5295_fp-{f_date}'
 #stream = args.stream
-data_dir = args.data_dir
-plot_type = args.plot_type
 
 # Load regions JSON file
 with open('regions.json', 'r') as infile:
@@ -62,6 +57,31 @@ regions = region_info[region] if region in ('0', '-1') else [region]
 times = {}
 
 
+
+
+def plot_cape():
+    # File path for CAPE data
+    #data_dir_cape = f'{data_dir}/GEOS.fp.fcst.inst3_2d_met_Nx.{f_date[:-1]}+20231224_0900.V01.nc4'
+    data_dir_cape = data_dir
+    
+    # Define the CAPE colormap and normalization
+    cape_cmap = Colormap('plotall_cape', 'CAPE')
+    cmap = cape_cmap.cmap
+    norm = cape_cmap.norm
+
+    # Load and extract the CAPE data
+    cube = loading.load_cube(data_dir_cape, 'CAPE', 1e15, pixel=True, no_project=True)
+    data = loading.clean_data(cube.data, undef=1e15)
+
+    # Resample data to 5760x2760 shape
+    data = congrid(data, (2760, 5760), center=True)
+
+    # Mask data values below 100 (the lower bound)
+    mask = data < 100
+    data = np.ma.masked_where(mask, data)
+    data = np.ma.masked_where(data > 10000, data)
+    
+    plot_data(data, cmap, norm, 'plotall_cape')
 
 
 def plot_ir8():
@@ -133,31 +153,6 @@ def plot_aerosols():
         data.append(blend)
     
     plot_data(data, cmaps, norms, 'plotall_aerosols')
-
-
-def plot_cape():
-    # File path for CAPE data
-    #data_dir_cape = f'{data_dir}/GEOS.fp.fcst.inst3_2d_met_Nx.{f_date[:-1]}+20231224_0900.V01.nc4'
-    data_dir_cape = data_dir
-    
-    # Define the CAPE colormap and normalization
-    cape_cmap = Colormap('plotall_cape', 'CAPE')
-    cmap = cape_cmap.cmap
-    norm = cape_cmap.norm
-
-    # Load and extract the CAPE data
-    cube = loading.load_cube(data_dir_cape, 'CAPE', 1e15, pixel=True, no_project=True)
-    data = loading.clean_data(cube.data, undef=1e15)
-
-    # Resample data to 5760x2760 shape
-    data = congrid(data, (2760, 5760), center=True)
-
-    # Mask data values below 100 (the lower bound)
-    mask = data < 100
-    data = np.ma.masked_where(mask, data)
-    data = np.ma.masked_where(data > 10000, data)
-    
-    plot_data([data], [cmap], [norm], 'plotall_cape')
 
 
 def plot_precrain():
@@ -539,8 +534,8 @@ def plot_data(data, cmap, norm, plot_tag):
 # Main routine to call appropriate plotting function based on specified plot type
 
 case = {
-    'ir8': plot_ir8(),
     'cape': plot_cape(),
+    'ir8': plot_ir8(),
     'aerosols': plot_aerosols(),
     'precrain': plot_precrain(),
     'precsnow': plot_precsnow(),
