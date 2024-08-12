@@ -250,7 +250,6 @@ def plot_tpw():
 
 
 def plot_vort500mb():
-    #data_dir_vort = f'{data_dir}/GEOS.fp.asm.tavg1_2d_slv_Nx.{f_date[:-1]}30.V01.nc4'
     data_dir_vort = data_dir
 
     # Define the vorticity colormap and normalization
@@ -313,7 +312,6 @@ def plot_vort500mb():
 
 
 def plot_winds10m():
-    #data_dir_winds = f'{data_dir}/GEOS.fp.asm.tavg1_2d_flx_Nx.{f_date[:-1]}30.V01.nc4'
     data_dir_winds = data_dir
 
     # Define the wind colormap and normalization
@@ -353,7 +351,6 @@ def plot_winds10m():
 
 
 def plot_radar():
-    #data_dir_radar = f'{data_dir}/GEOS.fp.fcst.inst_30mn_met_c0720sfc.{f_date[:-1]}+{f_date[:-1]}{minute}.V01.nc4'
     data_dir_radar = data_dir
 
     # Define the radar colormap and normalization
@@ -465,7 +462,7 @@ def plot_wxtype():
 
     plot_data(data, cmap, norm, 'plotall_wxtype')
 
-
+ 
 def plot_slp():
     print("Not yet implemented")
 
@@ -478,7 +475,6 @@ def plot_data(data, cmap, norm, plot_tag):
         region = str(region)
         file_tag = region_info[region]['file_tag']
         lon_cen, lat_cen = region_info[region]['center']
-        lon_beg, lon_end, lat_beg, lat_end = region_info[region]['extent'] if 'extent' in region_info[region] else (-180, 180, -90, 90)
         proj_name = region_info[region]['proj'] if file_tag not in ['australia_mapset', 'southamerica_mapset'] else 'sub'
         projs = {
             'sub': ccrs.PlateCarree(),
