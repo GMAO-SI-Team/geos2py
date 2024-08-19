@@ -3,6 +3,8 @@ import sys
 import netCDF4
 import numpy as np
 from netCDF4 import Dataset
+from netCDF4 import num2date
+from datetime import datetime
 
 class Cube(object):
     """
@@ -53,8 +55,6 @@ def load_cube(infile: str, search_variable: str, undef: float, **kwargs) -> Cube
         dataset = Dataset(infile)
         nc_variables = dataset.variables
         data = get_nc_variable_data(dataset, search_variable)
-
-        unlimited_dims = get_unlimited_dimensions(dataset)
 
         nx, ny, nf, nt, nz = [0] * 5
 
@@ -114,9 +114,7 @@ def load_cube(infile: str, search_variable: str, undef: float, **kwargs) -> Cube
         else:
             if 'ecmwf.inst3_3d_wxm_Np' in infile:
                 levels = nc_variables['isobaric']
-                cube_data = curate_levels(nc_variables, search_variable, levels, level, nx, ny, time=time)
                 settings['flip'] = True
-                # cube_data_m = images.flip_hemispheres(cube_data[:, ::-1, :])
             else:
                 levels = nc_variables['lev'] if level and nz >=1 else None
 
@@ -151,12 +149,6 @@ def load_cube(infile: str, search_variable: str, undef: float, **kwargs) -> Cube
         if dataset.isopen():
             dataset.close()
 
-        # if not settings['no_project']:
-        #     payload = arrays.ready_cube_interpolation(
-        #         cube_data_m, g_lons, g_lats, lon_beg, lon_end, lat_beg, lat_end, undef, file_tag, settings
-        #     )
-        #     data = arrays.interpolate_cube(payload, settings)
-        # else:
         data = cube_data_m
 
     else:
@@ -334,6 +326,7 @@ def get_nc_variable_data(dataset: netCDF4.Dataset, search_variable: str) -> np.n
     """
 
     return dataset.variables[search_variable][0].data
+
 
 def get_unlimited_dimensions(dataset) -> list:
     """
