@@ -1,4 +1,5 @@
 import os
+import csv
 import json
 import time
 import pickle
@@ -15,6 +16,7 @@ from processing.smoothing import savitzky_golay2d, bandpass_filter
 from processing.scaling import bytscl
 from datasets import loading
 from epilogue.annotation import annotate
+from scipy.interpolate import RegularGridInterpolator
 
 # Start timer
 t0 = time.time()
@@ -33,6 +35,10 @@ try:
                         help="Variable to be plotted. A full list of names and their corresponding variables can be found in the ReadMe.")
     
     parser.add_argument('--region', help="Region code. A full list of region codes can be found in the ReadMe (default: all regions)")
+
+    parser.add_argument('--cache_dir', help="Location of cache directory if not located in folder (default: /cache)")
+
+    parser.add_argument('--region_dir', help="Location of directory in which to save images (default: /results)")
 
     args = parser.parse_args()
 except argparse.ArgumentError as e:
@@ -63,6 +69,7 @@ except AttributeError as e:
     exit(1)
 
 region = args.region if args.region else '-1'
+cache_dir = args.cache_dir if args.cache_dir else '/cache'
 f_date = f'{year}{month}{day}_{hour}z'
 s_tag =  f'f5295_fp-{f_date}'
 
@@ -197,15 +204,10 @@ def plot_ir8():
         print(f"Unexpected error converting temperature data: {e}")
         return
 
-    try:
-        # First order conservative regridding using 4320x720 to 2880x1441 gridspec
-        data = regrid(data, method='conservative', gridspec=gridspec, undef=1e15)
-    except ValueError as e:
-        print(f"Error in data regridding: {e}")
-        return
-    except Exception as e:
-        print(f"Unexpected error during regridding: {e}")
-        return
+    # First order conservative regridding using 4320x720 to 2880x1441 gridspec
+    data = regrid(data, method='conservative', gridspec=gridspec, undef=1e15)
+    
+       
 
     try:
         # Resample data to 5760x2760 shape
@@ -229,12 +231,7 @@ def plot_aerosols():
     """
     Plotting routine for Aerosol data
     """
-    try:
-        # File path for aerosols data
-        data_dir = data_dir
-    except NameError as e:
-        print(f"Error: data_dir not defined: {e}")
-        return
+    data_dir = args.data_dir
 
     try:
         # Load aerosol data
@@ -265,17 +262,10 @@ def plot_aerosols():
         print(f"Unexpected error during data resampling: {e}")
         return
 
-    try:
-        # Define colormap and normalization for each aerosol
-        aerosol_types = ['SSEXTTAU', 'DUEXTTAU', 'OCEXTTAU', 'BCEXTTAU', 'SUEXTTAU', 'NIEXTTAU']
-        cmaps = [Colormap('plotall_aerosols', aerosol, data_min=0, data_max=0.5).cmap for aerosol in aerosol_types]
-        norms = [Colormap('plotall_aerosols', aerosol, data_min=0, data_max=0.5).norm for aerosol in aerosol_types]
-    except AttributeError as e:
-        print(f"Error initializing colormaps or norms: {e}")
-        return
-    except Exception as e:
-        print(f"Unexpected error in colormap or normalization setup: {e}")
-        return
+    # Define colormap and normalization for each aerosol
+    aerosol_types = ['SSEXTTAU', 'DUEXTTAU', 'OCEXTTAU', 'BCEXTTAU', 'SUEXTTAU', 'NIEXTTAU']
+    cmaps = [Colormap('plotall_aerosols', aerosol, data_min=0, data_max=0.5).cmap for aerosol in aerosol_types]
+    norms = [Colormap('plotall_aerosols', aerosol, data_min=0, data_max=0.5).norm for aerosol in aerosol_types]
 
     try:
         # Convert scalar mappable objects to RGBA arrays then scale alpha channels for blending
@@ -289,11 +279,8 @@ def plot_aerosols():
         print(f"Error during RGBA conversion or alpha channel scaling: {e}")
         return
 
-    try:
-        plot_data(data, cmaps, norms, 'plotall_aerosols')
-    except Exception as e:
-        print(f"Error during plotting: {e}")
-        return
+    plot_data(data, cmaps, norms, 'plotall_aerosols')
+    
 
 
 def plot_precrain():
@@ -1012,8 +999,25 @@ def plot_data(data, cmap, norm, plot_tag):
                 # Start regional timer
                 dt0 = time.time()
 
+                    # Read city coordinates
+                cities = 'cities/all_cities_md.txt' if file_tag == 'maryland_mapset' else 'cities/all_cities.txt'
+                city_coords = []
+                with open(cities, 'r') as csvfile:
+                    reader = csv.reader(csvfile)
+                    for row in reader:
+                        row = [item for item in row if item]
+                        if len(row) == 4 or 'world' in cities:
+                            city_lat, city_lon = [float(coord.strip().replace('+', '')) for coord in row[2:4]]
+                            city_coords.append((city_lat, city_lon))
+
+                # Define linear interpolator to locate cities by pixel
+                lons = np.linspace(-180, 180, 5760)
+                lats = np.linspace(-90, 90, 2760)
+                city_interpolator = RegularGridInterpolator((lats, lons), data, method='linear')
+
+
                 # Initialize plotter with tag and plot data
-                plotter = Plotter(plot_tag, region, file_tag, target_proj, proj_name)
+                plotter = Plotter(plot_tag, region, file_tag, target_proj, proj_name, label_coords=city_coords, interpolator=city_interpolator)
                 plotter.render(data, cmap, norm)
             except Exception as e:
                 print(f"Error during plotting for region {region}: {e}")
@@ -1034,7 +1038,7 @@ def plot_data(data, cmap, norm, plot_tag):
                 mode = 'dark' if proj_name in satellite else 'light'
 
                 # Annotate final image
-                annotate(f'tmp/{proj_name}-ir8-{file_tag}.png', plot_tag, mode=mode, forecast=forecast_str, date=date_index)
+                annotate(f'tmp/{proj_name}-{plot_type}-{file_tag}.png', plot_tag, mode=mode, forecast=forecast_str, date=date_index)
                 print(f'{file_tag} saved successfully')
             except Exception as e:
                 print(f"Error during image annotation for region {region}: {e}")
@@ -1075,6 +1079,7 @@ case = {
     'tpw': plot_tpw,
     'vort500mb': plot_vort500mb,
     'winds10m': plot_winds10m,
+    'radar': plot_radar,
     'slp': plot_slp
 }
 
