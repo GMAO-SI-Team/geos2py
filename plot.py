@@ -36,9 +36,9 @@ try:
     
     parser.add_argument('--region', help="Region code. A full list of region codes can be found in the ReadMe (default: all regions)")
 
-    parser.add_argument('--cache_dir', help="Location of cache directory if not located in folder (default: /cache)")
+    parser.add_argument('--cache_dir', help="Location of cache directory if not located in folder (default: /data)")
 
-    parser.add_argument('--region_dir', help="Location of directory in which to save images (default: /results)")
+    parser.add_argument('--results_dir', help="Location of directory in which to save images (default: /results)")
 
     args = parser.parse_args()
 except argparse.ArgumentError as e:
@@ -69,7 +69,8 @@ except AttributeError as e:
     exit(1)
 
 region = args.region if args.region else '-1'
-cache_dir = args.cache_dir if args.cache_dir else '/cache'
+cache_dir = args.cache_dir if args.cache_dir else 'data'
+results_dir = args.results_dir if args.results_dir else 'results'
 f_date = f'{year}{month}{day}_{hour}z'
 s_tag =  f'f5295_fp-{f_date}'
 
@@ -320,7 +321,7 @@ def plot_precrain():
     try:
         # Load and extract the rain data
         cube = loading.load_cube(data_dir, 'PRECTOT', 1e15, no_map_set=True).data
-        acc_data += congrid(cube, (2760, 5760), center=True)
+        acc_data += congrid(cube, (2760, 5760), center=True)        
     except FileNotFoundError as e:
         print(f"NetCDF file not found: {e}")
         return
@@ -333,6 +334,8 @@ def plot_precrain():
     except Exception as e:
         print(f"Unexpected error loading or processing rain data: {e}")
         return
+    
+    acc_data *= 1440
 
     try:
         plot_data(acc_data, cmap, norm, 'plotall_precrain')
@@ -409,6 +412,8 @@ def plot_precsnow():
     try:
         # Sum historic data and current data
         acc_data = acc_data + data
+        acc_data *= 1440
+
     except Exception as e:
         print(f"Error summing data: {e}")
         return
@@ -750,7 +755,7 @@ def plot_radar():
         if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
             tile_file = '/discover/nobackup/ltakacs/bcs/Ganymed-4_0/Ganymed-4_0_Ostia/Shared/DC2880xPC1441_CF0720x6C.bin'
         else:
-            tile_file = 'tiles/DC2880xPC1441_CF0720x6C.bin'
+            tile_file = 'data/DC2880xPC1441_CF0720x6C.bin'
     except Exception as e:
         print(f"Error determining tile file path: {e}")
         return
@@ -959,7 +964,7 @@ def plot_slp():
         mode = 'dark' if proj_name in satellite else 'light'
 
         # Annotate final image
-        annotate(f'tmp/{proj_name}-slp-{file_tag}.png', 'plotall_slp', mode=mode, forecast=forecast_str, date=date_index)
+        annotate(f'tmp/{proj_name}-slp-{file_tag}.png', 'plotall_slp', results_dir, mode=mode, forecast=forecast_str, date=date_index)
         print(f'{file_tag} saved successfully')
 
         # Record region time
@@ -1038,7 +1043,7 @@ def plot_data(data, cmap, norm, plot_tag):
                 mode = 'dark' if proj_name in satellite else 'light'
 
                 # Annotate final image
-                annotate(f'tmp/{proj_name}-{plot_type}-{file_tag}.png', plot_tag, mode=mode, forecast=forecast_str, date=date_index)
+                annotate(f'tmp/{proj_name}-{plot_type}-{file_tag}.png', plot_tag, results_dir, mode=mode, forecast=forecast_str, date=date_index)
                 print(f'{file_tag} saved successfully')
             except Exception as e:
                 print(f"Error during image annotation for region {region}: {e}")
