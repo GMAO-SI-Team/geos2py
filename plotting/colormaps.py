@@ -98,7 +98,8 @@ class Colormap(object):
             self._handle_error()
         rgb = cmap_data['rgb']
         levels = cmap_data['levels']
-        cmap = plt.colormaps[rgb] if type(rgb) == str else mpl.colors.ListedColormap(rgb)
+        cmap = plt.get_cmap(rgb) if isinstance(rgb, str) else mpl.colors.ListedColormap(rgb)
+
         if self.plot_type == 'plotall_aerosols':
             norm = mpl.colors.Normalize(vmin=self.data_min, vmax=self.data_max)
         else:
@@ -126,7 +127,7 @@ class Colormap(object):
         levels = function(np.linspace(0.0, len(levels) - 1, len(target)))
         return {'rgb': rgb, 'levels': levels}
     
-    @staticmethod
+#    @staticmethod
     def _set_levels_wxtype(func):
         """
         Decorator to set levels for weather type colormaps.
@@ -137,6 +138,7 @@ class Colormap(object):
             prec_dict['levels'] = levels
             return prec_dict
         return setter
+
 
     @_set_levels_wxtype
     def _set_snow(self):
@@ -230,7 +232,7 @@ class Colormap(object):
         ]) / 255
         return {'rgb': rgb, 'levels': np.arange(16) * 5.0}
 
-    @staticmethod
+#    @staticmethod
     def _set_levels_aerosols(func):
         """
         Decorator to set levels for aerosol colormaps.
