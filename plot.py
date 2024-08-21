@@ -206,7 +206,11 @@ def plot_ir8():
         return
 
     # First order conservative regridding using 4320x720 to 2880x1441 gridspec
-    data = regrid(data, method='conservative', gridspec=gridspec, undef=1e15)
+    if data.is2d:
+        data = congrid(data, (2760, 1441), center=True)
+    else:
+        data = regrid(data, method='conservative', gridspec=gridspec, undef=1e15)
+
     
        
 
@@ -770,8 +774,11 @@ def plot_radar():
         return
 
     try:
-        # First order conservative regridding using 4320x720 to 2880x1441 gridspec
-        data = regrid(cube.data, method='conservative', gridspec=gridspec, undef=1e15)
+         # First order conservative regridding using 4320x720 to 2880x1441 gridspec
+        if data.is2d:
+            data = congrid(data, (2760, 1441), center=True)
+        else:
+            data = regrid(data, method='conservative', gridspec=gridspec, undef=1e15)
     except Exception as e:
         print(f"Error during regridding: {e}")
         return
@@ -951,7 +958,7 @@ def plot_slp():
         pressure_plotter.render(data, cmap, norm)
         
         # Set image annotation text
-        forecast_hours = f'000 Forecast Hours'
+        forecast_hours = f'000 Forecast Hours'  
         forecast_hours = f'{forecast_hours}\n INIT: {f_date}'
         forecast_p_tag = f'GEOS {s_tag.split("-")[0]}'
         forecast_str = f'{forecast_hours}\n {forecast_p_tag}'
