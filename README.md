@@ -76,31 +76,31 @@ All functionalities are managed within the plot.py script, organized into the fo
 
 ### Plotting
 
-    •	Plotter Class
+• Plotter Class
     
-        o	Utilizes ax.imshow for filled contours, enhancing rendering speed and accuracy.
+    o Utilizes ax.imshow for filled contours, enhancing rendering speed and accuracy.
         
-        o	Labels are added using ax.text or ax.clabel with checks for accuracy in limited domains.
+    o Labels are added using ax.text or ax.clabel with checks for accuracy in limited domains.
         
-    •	Colormap Class
+• Colormap Class
     
-        o	Supports both existing Matplotlib colormaps and custom colormaps from NumPy arrays.
+    oSupports both existing Matplotlib colormaps and custom colormaps from NumPy arrays.
 
 ### Processing
 
-•	Regridding
+• Regridding
 
-    o	congrid, regrid, conservative_regrid: Handle various regridding tasks, optimized with Numba.
+    o congrid, regrid, conservative_regrid: Handle various regridding tasks, optimized with Numba.
     
-•	Smoothing
+• Smoothing
 
-    o	savitzky_golay2d: Applies Savitzky-Golay smoothing to 2D data.
+    o savitzky_golay2d: Applies Savitzky-Golay smoothing to 2D data.
     
-    o	bandpass_filter: Implements various bandpass filters for data denoising.
+    o bandpass_filter: Implements various bandpass filters for data denoising.
     
-•	Scaling
+• Scaling
 
-    o	bytscl: Scales images using IDL's bytscl function.
+    o bytscl: Scales images using IDL's bytscl function.
 
 ### Epilogue
 
@@ -110,9 +110,9 @@ All functionalities are managed within the plot.py script, organized into the fo
 
 ### Utilities
 
-•	Paths
+• Paths
 
-    o	Manages file paths and directories within the project.
+    o Manages file paths and directories within the project.
 
 ## How to Run the Scripts
 
