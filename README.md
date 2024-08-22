@@ -69,23 +69,23 @@ All functionalities are managed within the plot.py script, organized into the fo
 
 ### Processing
 
-    •	Regridding
-        o	congrid, regrid, conservative_regrid: Handle various regridding tasks, optimized with Numba.
-    •	Smoothing
-        o	savitzky_golay2d: Applies Savitzky-Golay smoothing to 2D data.
-        o	bandpass_filter: Implements various bandpass filters for data denoising.
-    •	Scaling
-        o	bytscl: Scales images using IDL's bytscl function.
+•	Regridding
+    o	congrid, regrid, conservative_regrid: Handle various regridding tasks, optimized with Numba.
+•	Smoothing
+    o	savitzky_golay2d: Applies Savitzky-Golay smoothing to 2D data.
+    o	bandpass_filter: Implements various bandpass filters for data denoising.
+•	Scaling
+    o	bytscl: Scales images using IDL's bytscl function.
 
 ### Epilogue
 
-    •	Annotate
-        o	Finalizes plot images with annotations using Pillow.
+•	Annotate
+    o	Finalizes plot images with annotations using Pillow.
 
 ### Utilities
 
-    •	Paths
-        o	Manages file paths and directories within the project.
+•	Paths
+    o	Manages file paths and directories within the project.
 
 ## How to Run the Scripts
 
