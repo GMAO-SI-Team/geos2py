@@ -78,9 +78,9 @@ All functionalities are managed within the plot.py script, organized into the fo
 
 • Plotter Class
     
-    o Utilizes ax.imshow for filled contours, enhancing rendering speed and accuracy.
+  o Utilizes ax.imshow for filled contours, enhancing rendering speed and accuracy.
         
-    o Labels are added using ax.text or ax.clabel with checks for accuracy in limited domains.
+  o Labels are added using ax.text or ax.clabel with checks for accuracy in limited domains.
         
 • Colormap Class
     
@@ -90,29 +90,29 @@ All functionalities are managed within the plot.py script, organized into the fo
 
 • Regridding
 
-    o congrid, regrid, conservative_regrid: Handle various regridding tasks, optimized with Numba.
+  o congrid, regrid, conservative_regrid: Handle various regridding tasks, optimized with Numba.
     
 • Smoothing
 
-    o savitzky_golay2d: Applies Savitzky-Golay smoothing to 2D data.
+  o savitzky_golay2d: Applies Savitzky-Golay smoothing to 2D data.
     
-    o bandpass_filter: Implements various bandpass filters for data denoising.
+  o bandpass_filter: Implements various bandpass filters for data denoising.
     
 • Scaling
 
-    o bytscl: Scales images using IDL's bytscl function.
+  o bytscl: Scales images using IDL's bytscl function.
 
 ### Epilogue
 
-•	Annotate
+• Annotate
 
-    o	Finalizes plot images with annotations using Pillow.
+  o	Finalizes plot images with annotations using Pillow.
 
 ### Utilities
 
 • Paths
 
-    o Manages file paths and directories within the project.
+  o Manages file paths and directories within the project.
 
 ## How to Run the Scripts
 
@@ -123,46 +123,84 @@ The main plotting function's arguments follow the following structure:
 ## Plot Types and Region Codes
 
 ### Plot Types (plot_type)
+
 •	'ir8': Infrared channel 8
+
 •	'radar': Radar
+
 •	'aerosols': Aerosols
+
 •	'precrain': Precipitable rain
+
 •	'precsnow': Precipitable snow
+
 •	'tpw': Total precipitable water
+
 •	't2m': Air temperature 2 meters above sea-level
+
 •	'slp': Surface-level pressure
+
 •	'cape': Convective available potential energy
+
 •	'vort500mb': 500 mb absolute vorticity
+
 •	'winds10m': Surface wind speed
 
 
 ### Region Codes (region_code) 
+
 Default value: -1 (all regions)
+
 These codes are serialized in regions.json.
+
 •	-1: All regions
+
 •	0: All global projections
+
 •	50: USA mapset
+
 •	89: Central USA mapset
+
 •	53: Mid-Atlantic mapset
+
 •	51: Maryland mapset
+
 •	49: North Atlantic mapset
+
 •	65: Europe mapset
+
 •	66: Asia mapset
+
 •	67: Australia mapset
+
 •	68: Africa mapset
+
 •	69: South America mapset
+
 •	70: North America mapset
+
 •	73: East Pacific mapset
+
 •	74: Indian Ocean mapset
+
 •	75: West Atlantic mapset
+
 •	34: North America projection
+
 •	35: West Pacific projection
+
 •	42: GOES East projection
+
 •	43: GOES West projection
+
 •	44: Meteosat-8 projection
+
 •	46: Meteosat-10 projection
+
 •	47: Himawari projection
+
 •	71: Northern Hemisphere projection
+
 •	72: Southern Hemisphere projection
 
 Use region code globe to plot the lat/lon globe projection.
@@ -175,15 +213,21 @@ The default value for this optional arugment is /results/. To change the locatio
 
 ## Example Plots
 RADAR:
+
+
  
 (RADAR Plot for USA)
 
 CAPE:
- 
+
+ ![plotall_cape-northamerica_mapset](https://github.com/user-attachments/assets/21ba3c42-1e67-4337-bf68-6be51b1b56ae)
+
 (CAPE plot for North America)
 
 T2M:
  
+ ![plotall_t2m-epacific_mapset](https://github.com/user-attachments/assets/c0edce4b-3eb0-4573-82a3-8e0773d89854)
+
 (T2M plot for Eastern Pacific)
 
 Important Notes
