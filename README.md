@@ -14,23 +14,38 @@ Table of Contents
 To set up your environment, use the following commands:
 
 '''sh
+
 ml use -a /home/mathomp4/modulefiles-SLES12
+
 ml python/MINIpyD
+
 '''
 
 Ensure the following dependencies are installed:
 •	python >= 3.11.4
+
 •	matplotlib >= 3.9.1
+
 •	cartopy >= 0.23.0
+
 •	pillow >= 10.4.0
+
 •	netcdf4 >= 1.7.1
+
 •	numpy >= 2.0.1
+
 •	scipy >= 1.14.0
+
 •	numba >= 0.60.0
+
 •	pyogrio >= 0.9.0
+
 •	geopandas >= 1.0.1
+
 •	pandas >= 2.2.2
+
 •	contourpy >= 1.2.1
+
 •	sunpy >= 6.0.0
 
 ## Performance
