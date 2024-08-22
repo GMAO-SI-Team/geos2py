@@ -118,11 +118,7 @@ All functionalities are managed within the plot.py script, organized into the fo
 
 The main plotting function's arguments follow the following structure:
 
-'''sh
-
-python plot.py file_location plot_type --region_code --cache_dir --results_dir
-
-'''
+        python plot.py file_location plot_type --region_code --cache_dir --results_dir
 
 ## Plot Types and Region Codes
 
