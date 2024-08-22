@@ -1,7 +1,7 @@
 # Experimental GEOS Forecasts with Python
 GMAOpy has been deprecated as it has fulfilled its role as a proof of concept. Future development efforts are now concentrated on GEOSpy. The entire codebase has been consolidated into a single script, plot.py, which now handles all data processing, visualization, and utility functions. This unification simplifies workflow execution and enhances performance while maintaining the modular architecture that allows for flexibility and efficiency.
 
-Table of Contents
+## Table of Contents
 1.	[Environment Setup](#environment-setup)
 2.	[Performance](#performance)
 3.	[Master Cache Script](#master-cache-script)
@@ -11,15 +11,7 @@ Table of Contents
 7.	[Plot Types and Region Codes](#plot-types-and-region-codes)
 
 ## Environment Setup
-To set up your environment, use the following commands:
 
-'''sh
-
-ml use -a /home/mathomp4/modulefiles-SLES12
-
-ml python/MINIpyD
-
-'''
 
 Ensure the following dependencies are installed:
 •	python >= 3.11.4
@@ -50,13 +42,16 @@ Ensure the following dependencies are installed:
 
 ## Performance
 The entire project has been refactored into a single script, plot.py, leading to significant performance improvements:
+
 •	Data Processing: Conservative regridding completes in approximately one second or less. Serialization and deserialization processes are highly optimized, while loading base images takes only seconds.
+
 •	Plotting: Some plots now render in as little as 10 seconds, with most graphical bugs resolved. However, there remains a computational issue with SLP minima location in the plotall_slp function.
 
 ## Master Cache Script
 
 The master_cache.py script is responsible for managing the caching of reprojected features and base images. It requires the following command-line arguments:
 •	plot_type: Name of the plot (e.g., plotall_ir8, plotall_radar) or all for all plot types.
+
 •	region: Numeric region code or all for all regions (_mapset and _proj).
 Optional argument:
 •	--element: Specifies whether to cache "features" (e.g., coastlines, borders) or "base_image" (e.g., background images).
@@ -64,10 +59,15 @@ Optional argument:
 ## Base Images and Shapefiles
 
 ### Base Images
+
 •	Color: /discover/nobackup/projects/gmao/g6dev/pub/BMNG/New/eo_base_2020_clean_geo.3x21600x10800.jpg
+
 •	Grayscale: /discover/nobackup/projects/gmao/g6dev/pub/BMNG/natural_earth_grey_16200x8100.jpeg
+
 ### Shapefiles
+
 •	Used in Code: /discover/nobackup/qcambrel/gmaopy/SHAPE_FILES
+
 •	Original Location: /home/wputman/IDL_ESSENTIALS/SHAPE_FILES
 
 ## Modules Overview
@@ -77,37 +77,51 @@ All functionalities are managed within the plot.py script, organized into the fo
 ### Plotting
 
     •	Plotter Class
+    
         o	Utilizes ax.imshow for filled contours, enhancing rendering speed and accuracy.
+        
         o	Labels are added using ax.text or ax.clabel with checks for accuracy in limited domains.
+        
     •	Colormap Class
+    
         o	Supports both existing Matplotlib colormaps and custom colormaps from NumPy arrays.
 
 ### Processing
 
 •	Regridding
+
     o	congrid, regrid, conservative_regrid: Handle various regridding tasks, optimized with Numba.
+    
 •	Smoothing
+
     o	savitzky_golay2d: Applies Savitzky-Golay smoothing to 2D data.
+    
     o	bandpass_filter: Implements various bandpass filters for data denoising.
+    
 •	Scaling
+
     o	bytscl: Scales images using IDL's bytscl function.
 
 ### Epilogue
 
 •	Annotate
+
     o	Finalizes plot images with annotations using Pillow.
 
 ### Utilities
 
 •	Paths
+
     o	Manages file paths and directories within the project.
 
 ## How to Run the Scripts
 
-To generate plots, run the following command:
+The main plotting function's arguments follow the following structure:
 
 '''sh
+
 python plot.py file_location plot_type --region_code --cache_dir --results_dir
+
 '''
 
 ## Plot Types and Region Codes
