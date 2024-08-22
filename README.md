@@ -212,11 +212,12 @@ The default value for this optional argument /data/. If the cached assets are lo
 The default value for this optional arugment is /results/. To change the location that the plots are saved to, use this argument to specify another folder. 
 
 ## Example Plots
-RADAR:
+PRECRAIN:
 
+![plotall_precrain-usa_mapset](https://github.com/user-attachments/assets/7535f920-719b-4cb4-a006-4958c24327e5)
 
  
-(RADAR Plot for USA)
+(PRECRAIN Plot for USA)
 
 CAPE:
 
@@ -231,8 +232,13 @@ T2M:
 (T2M plot for Eastern Pacific)
 
 Important Notes
+
 •	A known issue exists with find_slp_mins in plotall_slp, which incorrectly identifies too many minima.
+
 •	Additional code is needed to track forecast hours.
+
 •	Data accumulation for plotall_precsnow and plotall_precrain is managed by pickling the array.
+
 •	The aerosols plotting routine has a known error when generating the plots. 
+
 •	The conservative regridding function has errors when attempting to process 2-dimensional NetCDF files
