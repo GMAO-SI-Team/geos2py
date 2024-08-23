@@ -185,7 +185,7 @@ def plot_ir8():
         if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
             tile_file = '/discover/nobackup/ltakacs/bcs/Ganymed-4_0/Ganymed-4_0_Ostia/Shared/DC2880xPC1441_CF0720x6C.bin'
         else:
-            tile_file = 'data/DC2880xPC1441_CF0720x6C.bin'
+            tile_file = f'{cache_dir}/DC2880xPC1441_CF0720x6C.bin'
         
         gridspec = read_tile_file(tile_file)
     except FileNotFoundError as e:
@@ -206,7 +206,7 @@ def plot_ir8():
         return
 
     # First order conservative regridding using 4320x720 to 2880x1441 gridspec
-    if data.is2d:
+    if cube.is2d:
         data = congrid(data, (2760, 1441), center=True)
     else:
         data = regrid(data, method='conservative', gridspec=gridspec, undef=1e15)
@@ -433,12 +433,7 @@ def plot_t2m():
     """
     Plotting routine for T2M data
     """
-    try:
-        # data_dir_t2m = f'{data_dir}/GEOS.fp.asm.tavg1_2d_slv_Nx.{f_date[:-1]}30.V01.nc4'
-        data_dir_t2m = data_dir
-    except Exception as e:
-        print(f"Error in setting data directory: {e}")
-        return
+  
 
     try:
         # Define the temperature colormaps and normalization
@@ -454,7 +449,7 @@ def plot_t2m():
 
     try:
         # Read and extract the data
-        data = loading.load_cube(data_dir_t2m, 'T2M', 1e15, no_map_set=True).data
+        data = loading.load_cube(data_dir, 'T2M', 1e15, no_map_set=True).data
         data = (data - 273.15) * 1.8 + 32  # convert Kelvin to Fahrenheit
     except FileNotFoundError as e:
         print(f"NetCDF file not found: {e}")
@@ -759,7 +754,7 @@ def plot_radar():
         if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
             tile_file = '/discover/nobackup/ltakacs/bcs/Ganymed-4_0/Ganymed-4_0_Ostia/Shared/DC2880xPC1441_CF0720x6C.bin'
         else:
-            tile_file = 'data/DC2880xPC1441_CF0720x6C.bin'
+            tile_file = f'{cache_dir}/DC2880xPC1441_CF0720x6C.bin'
     except Exception as e:
         print(f"Error determining tile file path: {e}")
         return
@@ -775,7 +770,7 @@ def plot_radar():
 
     try:
          # First order conservative regridding using 4320x720 to 2880x1441 gridspec
-        if data.is2d:
+        if cube.is2d:
             data = congrid(data, (2760, 1441), center=True)
         else:
             data = regrid(data, method='conservative', gridspec=gridspec, undef=1e15)
