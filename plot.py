@@ -36,7 +36,7 @@ try:
     
     parser.add_argument('--region', help="Region code. A full list of region codes can be found in the ReadMe (default: all regions)")
 
-    parser.add_argument('--cache_dir', help="Location of cache directory if not located in folder (default: /data)")
+    parser.add_argument('--cache_dir', help="Location of cache directory if not located in folder (default: /cache)")
 
     parser.add_argument('--results_dir', help="Location of directory in which to save images (default: /results)")
 
@@ -69,7 +69,7 @@ except AttributeError as e:
     exit(1)
 
 region = args.region if args.region else '-1'
-cache_dir = args.cache_dir if args.cache_dir else 'data'
+cache_dir = args.cache_dir if args.cache_dir else 'cache'
 results_dir = args.results_dir if args.results_dir else 'results'
 f_date = f'{year}{month}{day}_{hour}z'
 s_tag =  f'f5295_fp-{f_date}'
@@ -185,7 +185,7 @@ def plot_ir8():
         if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
             tile_file = '/discover/nobackup/ltakacs/bcs/Ganymed-4_0/Ganymed-4_0_Ostia/Shared/DC2880xPC1441_CF0720x6C.bin'
         else:
-            tile_file = f'{cache_dir}/DC2880xPC1441_CF0720x6C.bin'
+            tile_file = f'data/DC2880xPC1441_CF0720x6C.bin'
         
         gridspec = read_tile_file(tile_file)
     except FileNotFoundError as e:
@@ -754,7 +754,7 @@ def plot_radar():
         if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
             tile_file = '/discover/nobackup/ltakacs/bcs/Ganymed-4_0/Ganymed-4_0_Ostia/Shared/DC2880xPC1441_CF0720x6C.bin'
         else:
-            tile_file = f'{cache_dir}/DC2880xPC1441_CF0720x6C.bin'
+            tile_file = f'data/DC2880xPC1441_CF0720x6C.bin'
     except Exception as e:
         print(f"Error determining tile file path: {e}")
         return
@@ -949,7 +949,7 @@ def plot_slp():
         dt0 = time.time()
 
         # Initialize sea level pressure plotter and plot data
-        pressure_plotter = Plotter('plotall_slp', region, file_tag, target_proj, proj_name, label_coords=(slp_min_locs, x_window))
+        pressure_plotter = Plotter('plotall_slp', region, file_tag, target_proj, proj_name, cache_dir, label_coords=(slp_min_locs, x_window))
         pressure_plotter.render(data, cmap, norm)
         
         # Set image annotation text
@@ -1024,7 +1024,7 @@ def plot_data(data, cmap, norm, plot_tag):
 
 
                 # Initialize plotter with tag and plot data
-                plotter = Plotter(plot_tag, region, file_tag, target_proj, proj_name, label_coords=city_coords, interpolator=city_interpolator)
+                plotter = Plotter(plot_tag, region, file_tag, target_proj, proj_name, cache_dir, label_coords=city_coords, interpolator=city_interpolator)
                 plotter.render(data, cmap, norm)
             except Exception as e:
                 print(f"Error during plotting for region {region}: {e}")
