@@ -154,7 +154,7 @@ The default value for this optional argument `data/`. If the cached assets are l
 
 ### results_dir
 
-The default value for this optional arugment is `results/`. To change the location that the plots are saved to, use this argument to specify another folder. 
+The default value for this optional argument is `results/`. To change the location that the plots are saved to, use this argument to specify another folder. 
 
 ## Example Plots
 
@@ -184,3 +184,4 @@ Important Notes
 *	Data accumulation for plotall_precsnow and plotall_precrain is managed by pickling the array.
 *	The aerosols plotting routine has a known error when generating the plots. 
 *	The conservative regridding function has errors when attempting to process 2-dimensional NetCDF files
+*	The precrain and precsnow functions scale the data by a factor of 1440 (24 hours * 60 minutes) before plotting the data
