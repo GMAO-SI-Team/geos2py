@@ -1,13 +1,14 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
 
-def annotate(path: str, plot_type: str, mode='light', **kwargs):
+def annotate(path: str, plot_type: str, dir: str, mode='light', **kwargs):
     """
     Annotates map images with colorbars, logos, and additional information.
 
     Parameters:
     - path (str): Path to the base map image.
     - plot_type (str): Type of plot for which annotation is being done.
+    - dir (str): Folder in which to save the image.
     - mode (str, optional): Color mode of the annotation (either 'light' or 'dark'). Defaults to 'light'.
     - **kwargs: Additional keyword arguments including forecast information and date.
 
@@ -64,8 +65,8 @@ def annotate(path: str, plot_type: str, mode='light', **kwargs):
         canvas.text((dst.width - 715, 2940), kwargs['forecast'], align='right', spacing=0, font=font, fill=fill)
 
     base_image = path.split('-')[-1]
-    if 'discover' in os.getcwd() or 'gpfsm' in os.getcwd():
-        dst.save(f'/discover/nobackup/projects/gmao/g6dev/pub/qcambrel/{plot_type}/{plot_type}-{base_image}')
-    else:
-        new_path = f'results/{plot_type}/{plot_type}-{base_image}'
-        dst.save(new_path)
+    folder_path = f'{dir}/{plot_type}/'
+    new_path = f'{dir}/{plot_type}/{plot_type}-{base_image}'
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    dst.save(new_path)

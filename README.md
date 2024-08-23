@@ -1,328 +1,244 @@
 # Experimental GEOS Forecasts with Python
+GMAOpy has been deprecated as it has fulfilled its role as a proof of concept. Future development efforts are now concentrated on GEOSpy. The entire codebase has been consolidated into a single script, plot.py, which now handles all data processing, visualization, and utility functions. This unification simplifies workflow execution and enhances performance while maintaining the modular architecture that allows for flexibility and efficiency.
 
-GMAOpy has effectively served its purpose as a proof of concept and is now depreciated. All further development will be focused on GEOSpy. All data processing and visualization functionality has been refactored and adapted into a more modular architecture. Utilities for logging, file management, asset management, and various other supplemental tasks have been provided. Relevant regional and global attributes have been serialized with JSON and YAML for improved readability and workflow. Coastlines, borders, and other shapefile data are now reprojected and cached for faster plotting. Base images have similarly been reprojected and cached for faster plotting. Modules for reproducing these images from scratch have been provided as utilities. Bear in mind that the aforementioned process is time consuming. Data processing procedures are highly optimized. Conservative regridding takes approximately a second or less. Serialization and deserialization is very fast. Loading of base images requires only seconds. Plotting is even further optimized with some average times dipping down to around 10 seconds. Graphical bugs are largely resolved. There just remains one computational bug concerning slp minima location in plotall_slp. All plots are functionally complete.  
+## Table of Contents
+1.	[Environment Setup](#environment-setup)
+2.	[Performance](#performance)
+3.	[Master Cache Script](#master-cache-script)
+4.	[Base Images and Shapefiles](#base-images-and-shapefiles)
+5.	[Modules Overview](#modules-overview)
+6.	[How to Run the Scripts](#how-to-run-the-scripts)
+7.	[Plot Types and Region Codes](#plot-types-and-region-codes)
 
 ## Environment Setup
-```sh
-ml use -a /home/mathomp4/modulefiles-SLES12
-ml python/MINIpyD
-```
 
-If you are working locally, the dependencies are:
-- python==3.11.4
-- matplotlib==3.8.0
-- cartopy==0.22.0
-- pillow==10.1.0
-- netcdf4==1.6.5
-- numpy==1.24.4
-- scipy==1.11.1
-- numba==0.57.1
-- pyogrio==0.6.0
-- geopandas==0.13.2
-- pandas==2.0.3
-- contourpy=1.1.0
 
-## Discover
+Ensure the following dependencies are installed:
+•	python >= 3.11.4
 
-Code
-`/discover/nobackup/qcambrel/geospy`
+•	matplotlib >= 3.9.1
 
-Images
-`/discover/nobackup/projects/gmao/g6dev/pub/qcambrel/`
+•	cartopy >= 0.23.0
 
-## See the images
+•	pillow >= 10.4.0
 
-Check out the datashare
-[NCCS Hosted Images](https://portal.nccs.nasa.gov/datashare/g6dev/qcambrel/)
+•	netcdf4 >= 1.7.1
+
+•	numpy >= 2.0.1
+
+•	scipy >= 1.14.0
+
+•	numba >= 0.60.0
+
+•	pyogrio >= 0.9.0
+
+•	geopandas >= 1.0.1
+
+•	pandas >= 2.2.2
+
+•	contourpy >= 1.2.1
+
+•	sunpy >= 6.0.0
 
 ## Performance
+The entire project has been refactored into a single script, plot.py, leading to significant performance improvements:
 
-#### plotall_ir8
-- average time 'sub': 0.0 hours 0.0 minutes 10.232033967971802 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 11.514650583267212 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 13.195988631248474 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 14.224856567382812 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 13.688894152641296 seconds
+•	Data Processing: Conservative regridding completes in approximately one second or less. Serialization and deserialization processes are highly optimized, while loading base images takes only seconds.
 
-#### plotall_wxtype
-- average time 'sub': 0.0 hours 0.0 minutes 39.75187683105469 seconds
-- average time 'ortho': 0.0 hours 1.0 minutes 47.156792879104614 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 48.601584911346436 seconds
-- average time 'geos': 0.0 hours 1.0 minutes 46.67049479484558 seconds
-- average time 'nsper': 0.0 hours 1.0 minutes 50.50699996948242 seconds
+•	Plotting: Some plots now render in as little as 10 seconds, with most graphical bugs resolved. However, there remains a computational issue with SLP minima location in the plotall_slp function.
 
-#### plotall_radar
-- average time 'sub': 0.0 hours 0.0 minutes 14.13889753818512 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 15.65565550327301 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 16.701356053352356 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 16.995589017868042 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 17.368183076381683 seconds
+## Master Cache Script
 
-#### plotall_precrain
-- average time 'sub': 0.0 hours 0.0 minutes 8.57942807674408 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 11.32456088066101 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 13.072884774208068 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 12.116543436050415 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 12.069870054721832 seconds
+The master_cache.py script is responsible for managing the caching of reprojected features and base images. It requires the following command-line arguments:
+•	plot_type: Name of the plot (e.g., plotall_ir8, plotall_radar) or all for all plot types.
 
-#### plotall_precsnow
-- average time 'sub': 0.0 hours 0.0 minutes 9.807256579399109 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 10.264758110046387 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 11.609730076789855 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 11.448821258544921 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 10.888549625873566 seconds
+•	region: Numeric region code or all for all regions (_mapset and _proj).
+Optional argument:
+•	--element: Specifies whether to cache "features" (e.g., coastlines, borders) or "base_image" (e.g., background images).
 
-#### plotall_aerosols
-- average time 'sub': 0.0 hours 0.0 minutes 43.48659408092499 seconds
-- average time 'ortho': 0.0 hours 1.0 minutes 12.818154454231262 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 54.68324718475342 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 55.37871561050415 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 49.24169617891312 seconds
+## Base Images and Shapefiles
 
-#### plotall_slp
-- average time 'sub': 0.0 hours 0.0 minutes 9.654320478439331 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 11.35473096370697 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 12.980954432487488 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 14.44656057357788 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 16.031678676605225 seconds
+### Base Images
 
-#### plotall_t2m
-- average time 'sub': 0.0 hours 0.0 minutes 9.49286139011383 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 12.913065075874329 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 13.569564175605773 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 13.966146612167359 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 14.035657703876495 seconds
+•	Color: /discover/nobackup/projects/gmao/g6dev/pub/BMNG/New/eo_base_2020_clean_geo.3x21600x10800.jpg
 
-#### plotall_tpw
-- average time 'sub': 0.0 hours 0.0 minutes 11.00346064567566 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 12.062952399253845 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 14.307450294494629 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 13.70802993774414 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 13.780909240245819 seconds
+•	Grayscale: /discover/nobackup/projects/gmao/g6dev/pub/BMNG/natural_earth_grey_16200x8100.jpeg
 
-#### plotall_cape
-- average time 'sub': 0.0 hours 0.0 minutes 10.370289087295532 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 12.009145975112915 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 13.465498185157776 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 13.688392782211304 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 12.895038187503815 seconds
+### Shapefiles
 
-#### plotall_vort500mb
-- average time 'sub': 0.0 hours 0.0 minutes 24.911166191101074 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 42.29221761226654 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 50.836144137382504 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 43.15956325531006 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 43.311415791511536 seconds
+•	Used in Code: /discover/nobackup/qcambrel/gmaopy/SHAPE_FILES
 
-#### plotall_winds10m
-- average time 'sub': 0.0 hours 0.0 minutes 10.466203808784485 seconds
-- average time 'ortho': 0.0 hours 0.0 minutes 12.390382051467896 seconds
-- average time 'laea': 0.0 hours 0.0 minutes 14.286669969558716 seconds
-- average time 'geos': 0.0 hours 0.0 minutes 15.273489904403686 seconds
-- average time 'nsper': 0.0 hours 0.0 minutes 14.948720812797546 seconds
+•	Original Location: /home/wputman/IDL_ESSENTIALS/SHAPE_FILES
 
-## TODO
-- Fix storm location bug in plotall_slp
-    - Likely due to issues with the ideal bandpass filter implementation
-- Fix data inaccuracy bug in plotall_precsnow
-    - Likely due to a masking issue
-- Get better blending with plotall_aerosols
-    - Still not sure how to improve this just yet
-- Stay up to date on Cartopy and Matplotlib releases
-- Update prologue to handle different dates and directories
-- Figure out how the logging should work
-- Complete conditional Python or IDL functionality for forecast Shell script
-- Continue to add more documentation
-- Refactor for better cohesion where worth it
+## Modules Overview
 
-## Caching
-A lot of performance improvements are resultant from pre-emptive caching. Chief cached elements include coastlines, borders, natural earth base images, and so on. These assets are pretransformed to suit the corresponding plot and region and are named accordingly. It is strongly encouraged that anyone running these scripts simply copy the cached images from a folder in this repo or on Discover. There is a script responsible for caching the assets, but beware that it takes close to a day to complete caching for all plot types and all regions in one go. The total cache takes up 1.4 GB of disk space.
+All functionalities are managed within the plot.py script, organized into the following modules:
 
-#### master_cache.py
-When running this script, it expects two commmand line arguments: "plot_type" and "region".
-- plot_type: name of plot such as plotall_ir8 or plotall_radar or all for all plot_types
-- region: numeric region code or all for all regions (_mapset and _proj)
+### Plotting
 
-I have added an optional argument: "--element",
-- element: expects "features", which just grabs features like coastlines, borders, roads, etc or "base_image", which just grabs the relevant natural Earth background
+• Plotter Class
+    
+  o Utilizes ax.imshow for filled contours, enhancing rendering speed and accuracy.
+        
+  o Labels are added using ax.text or ax.clabel with checks for accuracy in limited domains.
+        
+• Colormap Class
+    
+    oSupports both existing Matplotlib colormaps and custom colormaps from NumPy arrays.
 
-Generally, I recommended just copying the zip file of all the cached elements.
-```sh
-cp /discover/nobackup/qcambrel/geospy/cache.zip destination_directory
-```
-**cache updated 2/29/24**
+### Processing
 
-## Base Images
-The original base images can be found at:
+• Regridding
 
-color
-`/discover/nobackup/projects/gmao/g6dev/pub/BMNG/New/eo_base_2020_clean_geo.3x21600x10800.jpg`
+  o congrid, regrid, conservative_regrid: Handle various regridding tasks, optimized with Numba.
+    
+• Smoothing
 
-grayscale
-`/discover/nobackup/projects/gmao/g6dev/pub/BMNG/natural_earth_grey_16200x8100.jpeg`
+  o savitzky_golay2d: Applies Savitzky-Golay smoothing to 2D data.
+    
+  o bandpass_filter: Implements various bandpass filters for data denoising.
+    
+• Scaling
 
-## Shapefiles
-The code uses shapefiles located at:
-`/discover/nobackup/qcambrel/gmaopy/SHAPE_FILES`
+  o bytscl: Scales images using IDL's bytscl function.
 
-The original shapefiles are located at:
-`/home/wputman/IDL_ESSENTIALS/SHAPE_FILES`
+### Epilogue
 
-## Driver Script
-Driver Shell script now has the LANG parameter. User must enter **idl** or **python**. This needs to tested by a user with sufficient permissions. 
+• Annotate
 
-## Modules
-- plotting
-    - plots.Plotter class
-        - Filled contours are depicted with ax.imshow in place of ax.contourf or ax.pcolormesh. This is all around faster and less prone to corrupted or inaccurately reprojected data.
-        - Labels are plotted using ax.text based on interpolated coordinates unless the labels belong to contour lines then ax.clabel is used instead. The former is prone to error but using checks for limited domains or null reprojected values serves as an effective defense.   
-    - colormaps.Colormap class
-        - Colormaps are either a pre-existing Matplotlib colormap or generated from a NumPy array of rgb values using colors.ListedColormap then normalized based on the levels for the respective plot.
-- processing
-    - regridding
-        - congrid: resample data array to specified dimensions
-        - regrid: regrid data array based on specified method and gridspec
-        - conservative_regrid: implement first order conservative regridding based on gridspec; vectorized by Numba
-        - read_nt: returns tile file dimensions
-        - read_tile_file: returns tile file to prepare gridspec
-    - smoothing
-        - savitzky_golay2d: implements the Savitzky Golay 2D algorithm to smooth noisy contours
-        - bandpass_filter: implements the IDL bandpass filter function with ideal, butterworth, and gaussian flags bandpass to denoise data for minima search
-    - scaling
-        - bytscl: implements IDL bytscl function to scale image based on high and low parameters
-- epilogue
-    - annotate: composes the final plot image using Pillow
-- utils
-    - paths
+  o	Finalizes plot images with annotations using Pillow.
 
-## How to run the scripts
-```sh
-python plot_type.py year month day hour minute tag s_tag data_dir stream --region=region_code --f_date=f_date
-```
+### Utilities
 
-#### Plot Types
-- plotall_ir8
-- plotall_radar
-- plotall_wxtype
-- plotall_aerosols
-- plotall_precrain
-- plotall_precsnow
-- plotall_tpw
-- plotall_t2m
-- plotall_slp
-- plotall_cape
-- plotall_vort500mb
-- plotall_winds10m
+• Paths
 
-#### Region Codes
-These are all serialized in regions.json.
-- region code -1: all regions
-- region code 0: all global projections
-- region code 50: usa_mapset
-- region code 89: centralusa_mapset
-- region code 53: midatlantic_mapset
-- region code 51: maryland_mapset
-- region code 49: northatlantic_mapset
-- region code 65: europe_mapset
-- region code 66: asia_mapset
-- region code 67: australia_mapset
-- region code 68: africa_mapset
-- region code 69: southamerica_mapset
-- region code 70: northamerica_mapset
-- region code 73: epacific_mapset
-- region code 74: indianocean_mapset
-- region code 75: westatlantic_mapset
-- region code 34: northamerica_proj
-- region code 35: westpacific_proj
-- region code 42: goeseast_proj
-- region code 43: goeswest_proj
-- region code 44: meteosat8_proj
-- region code 46: meteosat10_proj
-- region code 47: himawari_proj
-- region code 71: nh_proj
-- region code 72: sh_proj
+  o Manages file paths and directories within the project.
 
-Use region code "globe" to plot the latlon globe projection 
+## How to Run the Scripts
 
-### Using canned values
+The main plotting function's arguments follow the following structure:
 
-#### plotall_ir8
-test arguments
-```sh
-python plotall_ir8.py 2023 05 29 12 00 G5GMAO f5295_fp-20230529_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_12z' && python plotall_ir8.py 2023 05 29 12 00 G5GMAO f5295_fp-20230529_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_12z'
-```
+        python plot.py file_location plot_type --region_code --cache_dir --results_dir
 
-#### plotall_wxtype
-test arguments
-```sh
-python plotall_wxtype.py 2023 05 29 00 00 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_00z' && python plotall_wxtype.py 2023 05 29 00 00 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_00z'
-```
-#### plotall_radar
-test arguments
-```sh
-python plotall_radar.py 2023 05 29 12 00 G5GMAO f5295_fp-20230529_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_12z' && python plotall_radar.py 2023 05 29 12 00 G5GMAO f5295_fp-20230529_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_12z'
-```
+## Plot Types and Region Codes
 
-#### plotall_precrain
-test arguments
-```sh
-python plotall_precrain.py 2023 05 29 00 00 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_00z' && python plotall_precrain.py 2023 05 29 00 00 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_00z'
-```
+### Plot Types (plot_type)
 
-#### plotall_precsnow
-test arguments
-```sh
-python plotall_precsnow.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_00z' && python plotall_precsnow.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_00z'
-```
+•	'ir8': Infrared channel 8
 
-#### plotall_cape
-test arguments
-```sh
-python plotall_cape.py 2023 12 23 12 00 G5GMAO f5295_fp-20231223_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20231223_12z' && python plotall_tpw.py 2023 12 23 12 00 G5GMAO f5295_fp-20231223_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20231223_12z'
-```
+•	'radar': Radar
 
-#### plotall_winds10m
-test arguments
-```sh
-python plotall_winds10m.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_00z' && python plotall_winds10m.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_00z'
-```
+•	'aerosols': Aerosols
 
-#### plotall_vort500mb
-test arguments
-```sh
-python plotall_vort500mb.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_00z' && python plotall_vort500mb.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_00z'
-```
+•	'precrain': Precipitable rain
 
-#### plotall_t2m
-test arguments
-```sh
-python plotall_t2m.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_00z' && python plotall_t2m.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_00z'
-```
+•	'precsnow': Precipitable snow
 
-#### plotall_tpw
-test arguments
-```sh
-python plotall_tpw.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_00z' && python plotall_tpw.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_00z'
-```
+•	'tpw': Total precipitable water
 
-#### plotall_slp
-test arguments
-```sh
-python plotall_slp.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20230529_00z' && python plotall_slp.py 2023 05 29 00 30 G5GMAO f5295_fp-20230529_00z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20230529_00z'
-```
+•	't2m': Air temperature 2 meters above sea-level
 
-#### plotall_aerosols
-test arguments
-```sh
-python plotall_aerosols.py 2023 10 11 12 00 G5GMAO f5295_fp-20231011_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='-1' --f_date='20231011_12z' && python plotall_aerosols.py 2023 10 11 12 00 G5GMAO f5295_fp-20231011_12z /discover/nobackup/qcambrel/geospy/data inst1_2d_asm_Mx --region='0' --f_date='20231011_12z'
-```
+•	'slp': Surface-level pressure
 
-## Important Notes
-- All plots are functional and have *"the right look"*
-- There is an issue with find_slp_mins in plotall_slp that results in "finding" way too many locations
-- Code still needs to be added to handle tracking of forecast hours
-- Paths module is started but needs to be finished
-- Data accumulation for plotall_precsnow and plotall_precrain is handled by pickling the array
-- Refer to /home/wputman/IDL_ESSENTIALS/setup_region.pro if new region information is required
-- Updating regions.json is highly recommended
-- Logging is still untested
+•	'cape': Convective available potential energy
+
+•	'vort500mb': 500 mb absolute vorticity
+
+•	'winds10m': Surface wind speed
+
+
+### Region Codes (region_code) 
+
+Default value: -1 (all regions)
+
+These codes are serialized in regions.json.
+
+•	-1: All regions
+
+•	0: All global projections
+
+•	50: USA mapset
+
+•	89: Central USA mapset
+
+•	53: Mid-Atlantic mapset
+
+•	51: Maryland mapset
+
+•	49: North Atlantic mapset
+
+•	65: Europe mapset
+
+•	66: Asia mapset
+
+•	67: Australia mapset
+
+•	68: Africa mapset
+
+•	69: South America mapset
+
+•	70: North America mapset
+
+•	73: East Pacific mapset
+
+•	74: Indian Ocean mapset
+
+•	75: West Atlantic mapset
+
+•	34: North America projection
+
+•	35: West Pacific projection
+
+•	42: GOES East projection
+
+•	43: GOES West projection
+
+•	44: Meteosat-8 projection
+
+•	46: Meteosat-10 projection
+
+•	47: Himawari projection
+
+•	71: Northern Hemisphere projection
+
+•	72: Southern Hemisphere projection
+
+Use region code globe to plot the lat/lon globe projection.
+
+### cache_dir
+The default value for this optional argument /data/. If the cached assets are located elsewhere, use this argument to specify its location.
+
+### results_dir
+The default value for this optional arugment is /results/. To change the location that the plots are saved to, use this argument to specify another folder. 
+
+## Example Plots
+PRECRAIN:
+
+![plotall_precrain-usa_mapset](https://github.com/user-attachments/assets/7535f920-719b-4cb4-a006-4958c24327e5)
+
+ 
+(PRECRAIN Plot for USA)
+
+CAPE:
+
+ ![plotall_cape-northamerica_mapset](https://github.com/user-attachments/assets/21ba3c42-1e67-4337-bf68-6be51b1b56ae)
+
+(CAPE plot for North America)
+
+T2M:
+ 
+ ![plotall_t2m-epacific_mapset](https://github.com/user-attachments/assets/c0edce4b-3eb0-4573-82a3-8e0773d89854)
+
+(T2M plot for Eastern Pacific)
+
+Important Notes
+
+•	A known issue exists with find_slp_mins in plotall_slp, which incorrectly identifies too many minima.
+
+•	Additional code is needed to track forecast hours.
+
+•	Data accumulation for plotall_precsnow and plotall_precrain is managed by pickling the array.
+
+•	The aerosols plotting routine has a known error when generating the plots. 
+
+•	The conservative regridding function has errors when attempting to process 2-dimensional NetCDF files

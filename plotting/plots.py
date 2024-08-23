@@ -9,7 +9,7 @@ class Plotter(object):
     """
     Plotter instance to render GEOS forecasts
     """
-    def __init__(self, plot_type: str, region: str, file_tag: str, target_proj: ccrs.Projection, proj_name: str, label_coords=None, interpolator=None):
+    def __init__(self, plot_type: str, region: str, file_tag: str, target_proj: ccrs.Projection, proj_name: str, cache_dir: str, label_coords=None, interpolator=None):
         """
         Initialize Plotter object.
 
@@ -30,6 +30,7 @@ class Plotter(object):
         self.lons, self.lats = np.meshgrid(lons, lats)
         self.target_proj = target_proj
         self.proj_name = proj_name
+        self.cache_dir = cache_dir
         self.label_coords = label_coords
         self.interpolator = interpolator
         self.limit_extent = proj_name in ('sub', 'ortho', 'laea')
@@ -59,7 +60,7 @@ class Plotter(object):
             'plotall_winds10m': 'wind'
         }
         self.contour_path = f'tmp/tmp_{plot_abbr[self.plot_type]}_{self.file_tag}.png'
-        self.feature_path = f'cache/cb_{plot_abbr[self.plot_type]}_{self.file_tag}.png'
+        self.feature_path = f'{self.cache_dir}/cb_{plot_abbr[self.plot_type]}_{self.file_tag}.png'
         self.completed_path = f'tmp/{self.proj_name}-{self.plot_type.split("_")[1]}-{self.file_tag}.png'
         
         grayscale = {
@@ -71,7 +72,7 @@ class Plotter(object):
             'plotall_cape': 'white',
             'plotall_vort500mb': 'auto'
         }
-        self.natural_earth_path = f'cache/natural_earth_{grayscale[self.plot_type]}_{self.file_tag}.png' if self.plot_type in grayscale else None
+        self.natural_earth_path = f'{self.cache_dir}/natural_earth_{grayscale[self.plot_type]}_{self.file_tag}.png' if self.plot_type in grayscale else None
 
     def _set_plotters(self):
         """
@@ -175,6 +176,8 @@ class Plotter(object):
         """
         Plot aerosols data. Includes seasalt, dust, organic carbon, black carbon, sulfate and nitrate.
         """
+        
+
         ss, du, oc, bc, su, ni = self.data
         self.ax.imshow(ss, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
         self.ax.imshow(du, interpolation='nearest', transform=ccrs.PlateCarree(), extent=(-180, 180, -90, 90), origin='lower')
